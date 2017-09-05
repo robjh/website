@@ -1,0 +1,10 @@
+{
+	"files": {
+		"config.json": {
+			"action":"ignore"
+		},
+		"lib/style.css": {
+			"action":"raw"
+		}
+	}
+}

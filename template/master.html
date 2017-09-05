@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta http-equiv="Content-type" content="text/html; charset=utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=0.8">
+	<title>${title}</title>
+	<link type="text/css" href="http://www.robjh.com/lib/style.css" rel="stylesheet" />
+</head>
+<body>
+<div id="master">
+	
+	<div id="site_header">
+		<div id="terminal">
+			guest@www.RobJH.com
+		</div>
+		<div id="header_hr"><hr></div>
+	</div>
+	<div id="site_container">
+		${body}
+	</div>
+
+</div>
+<script src="http://www.robjh.com/lib/ao.js"></script>
+<script type="text/javascript"><!--
+	var ao = ao_get().include('terminal');
+--></script>
+<script src="http://www.robjh.com/lib/robjh.js"></script>
+<script>
+
+
+	ao.ready(function() {
+
+		var site_root = "";
+		var fs = robjh.fs({
+			chroot:  site_root,
+			hint:   {"type":"dir","children":{"mnt":{"type":"dir"},"about":{"type":"dir"},"var":{"type":"dir"},"home":{"type":"dir"},"lib":{"type":"dir"},"usr":{"type":"dir"},"bin":{"type":"dir"}},"complete":true}
+		});
+
+		var path = window.location.pathname.substr(site_root.length);
+		var index_specified = path.endsWith("index.php");
+		if (index_specified) {
+			path = path.substring(0, path.length - 9);
+		}
+		var target = fs.root.path_resolve(path);
+		var pwd = target.is_dir ? target : target.parent();
+		if (target.is_dir && !index_specified && target.children['default.html']) {
+			target = pwd.children['default.html'];
+		}
+
+		var page = robjh.page({
+			container:  document.getElementById('site_container'),
+			global:     true,
+			fs:         fs
+		});
+
+		if (window.location.hash && window.location.hash.startsWith('#./')) {
+			var hash_node = pwd.path_resolve(window.location.hash.substr(1));
+			if (hash_node) {
+				target = hash_node;
+				page.node_change_inplace(target);
+				pwd = target.is_dir ? target : target.parent();
+			}
+		} else if (target.has_local_content()) {
+			page.node_change_inplace(target);
+		} else {
+
+			// setup onclick events for links.
+			var a_arr = Array.prototype.slice.call(
+				document.getElementById('site_container').getElementsByTagName('a')
+			);
+			for (var i = 0, l = a_arr.length ; i < l ; ++i) {
+				var path = a_arr[i].getAttribute('data-path');
+				var type = a_arr[i].getAttribute('data-type');
+
+				if (path) {
+					var node = pwd.path_resolve(path);
+
+					if (node.type() == robjh.fs.types[type]) {
+						a_arr[i].addEventListener('click', node.event_click);
+						a_arr[i].href = node.url();
+					} else {
+						console.error("unknown type ("+type+") for path ("+path+") in pre-rendered content.");
+					}
+				}
+			}
+		}
+		page.fix_initial_history(target);
+
+		var term = ao.terminal({
+			container:  document.getElementById("terminal"),
+			auto_focus: true,
+			append:     false,
+			process: robjh.shell,
+			process_init_argv: {
+				fs:         fs,
+				pwd:        pwd,
+				hostname:   'www.RobJH.com',
+				username:   'guest',
+				args:       'echo "This is what happens when you prioritise showing off over SEO." | cowsay;',
+			}
+		});
+
+	});
+
+</script>
+</body>
+</html>
