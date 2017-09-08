@@ -1,0 +1,3 @@
+[submodule "filesystem/lib/aojs"]
+	path = filesystem/lib/aojs
+	url = git@github.com:robjh/aojs.git
