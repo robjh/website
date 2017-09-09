@@ -3,6 +3,7 @@
 import argparse
 import os
 import json
+import css_html_js_minify
 from pprint import pprint
 
 import template
@@ -89,6 +90,7 @@ def main():
 	parser.add_argument('--skel', help='A directory containing the skeleton of the website.')
 	parser.add_argument('--webdir', help='Directory where the site will be rendered to.')
 	parser.add_argument('--url', help='The web facing address of --webdir')
+	parser.add_argument('--minify', action="store_true", help='Runs HTML, Javascript and CSS files through a minifier.')
 	args = parser.parse_args()
 	path = Path_Reformatter(src=args.skel, dest=args.webdir)
 
@@ -134,13 +136,13 @@ def main():
 					page.parse(fd.read())
 
 				with open(path.dest(path.MUTUAL, mutualpath), 'w') as fd:
-					fd.write(page.render())
+					fd.write(page.render(minify=args.minify))
 				index.append({"name":file, "type":"text/html"})
 			print("/"+mutualpath)
 
 		# create index pages
 		with open(os.path.join(path.dest(path.SRC, path_src), "index.html"), 'w') as fd:
-			fd.write( template.Html_Index(path_src, index).render() )
+			fd.write( template.Html_Index(path_src, index).render(minify=args.minify) )
 			if "index.html" in listing: listing.remove("index.html")
 		with open(os.path.join(path.dest(path.SRC, path_src), "index.json"), 'w') as fd:
 			fd.write( json.dumps(index) )

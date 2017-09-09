@@ -1,6 +1,7 @@
 from string import Template
 from html.parser import HTMLParser
 from urllib.parse import urlparse
+from css_html_js_minify import html_minify, js_minify
 import json
 
 templates = {}
@@ -42,7 +43,9 @@ class Html_Node():
 		if _bodyless_tags.count(self.name):
 			return "<{0}{1}>".format(self.name, attrs)
 
-		return "<{0}{1}>{2}</{0}>".format(self.name, attrs, self.build_children())
+		body = self.build_children()
+
+		return "<{0}{1}>{2}</{0}>".format(self.name, attrs, body)
 
 	def build_children(self):
 		ret = ""
@@ -184,8 +187,11 @@ class Html():
 		self.subs["body"] = parser.contents
 		self.subs["title"] = parser.title
 
-	def render(self):
-		return templates['master'].substitute(self.subs)
+	def render(self, minify):
+		doc = templates['master'].substitute(self.subs)
+		if (minify):
+			return html_minify(doc)
+		return doc
 
 class Html_Index(Html):
 	def __init__(self, path, index):
@@ -200,7 +206,7 @@ class Html_Index(Html):
 		self.index = index
 #		self.body(json.dumps(index))
 
-	def render(self):
+	def render(self, minify):
 		# build index rows
 		rows = []
 		for i in self.index:
@@ -216,5 +222,5 @@ class Html_Index(Html):
 		self.subs["body"] = templates["index"].substitute({
 			"index_table_row": str.join("",rows)
 		})
-		return Html.render(self)
+		return Html.render(self, minify)
 

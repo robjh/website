@@ -6,6 +6,9 @@
 		"lib/style.css": {
 			"action":"raw"
 		},
+		"lib/robjh.js": {
+			"action":"raw"
+		},
 		"lib/aojs/ao.js": {
 			"action":"raw"
 		}

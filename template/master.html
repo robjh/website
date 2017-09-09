@@ -20,16 +20,17 @@
 
 </div>
 <script src="${uri}lib/aojs/ao.js"></script>
-<script type="text/javascript"><!--
+<script type="text/javascript">
 	var ao = ao_get().include('terminal');
---></script>
+</script>
 <script src="${uri}lib/robjh.js"></script>
 <script>
+'use strict';
 
 
 	ao.ready(function() {
 
-		var site_root = "";
+		var site_root = "${uri}";
 		var fs = robjh.fs({
 			chroot:  site_root,
 			hint:   {"type":"dir","children":{"mnt":{"type":"dir"},"about":{"type":"dir"},"var":{"type":"dir"},"home":{"type":"dir"},"lib":{"type":"dir"},"usr":{"type":"dir"},"bin":{"type":"dir"}},"complete":true}
@@ -63,7 +64,7 @@
 			page.node_change_inplace(target);
 		} else {
 
-			// setup onclick events for links.
+			/* setup onclick events for links. */
 			var a_arr = Array.prototype.slice.call(
 				document.getElementById('site_container').getElementsByTagName('a')
 			);
@@ -93,7 +94,7 @@
 			process_init_argv: {
 				fs:         fs,
 				pwd:        pwd,
-				hostname:   '${uri}',
+				hostname:   '${domain}',
 				username:   'guest',
 				args:       'echo "This is what happens when you prioritise showing off over SEO." | cowsay;',
 			}
