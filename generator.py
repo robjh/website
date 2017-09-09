@@ -88,10 +88,11 @@ def main():
 	parser = argparse.ArgumentParser(description='Renders a website from a template of static files.')
 	parser.add_argument('--skel', help='A directory containing the skeleton of the website.')
 	parser.add_argument('--webdir', help='Directory where the site will be rendered to.')
+	parser.add_argument('--url', help='The web facing address of --webdir')
 	args = parser.parse_args()
 	path = Path_Reformatter(src=args.skel, dest=args.webdir)
 
-	template.load()
+	template.load(args.url)
 
 
 	config = load_config(os.path.join(path.dir_src, "config.json"))

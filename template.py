@@ -1,16 +1,24 @@
 from string import Template
 from html.parser import HTMLParser
+from urllib.parse import urlparse
 import json
 
 templates = {}
 
-def load():
+_domain = None
+_uri    = None
+
+def load(url):
+	global _domain, _uri
 	with open("./template/master.html") as fd:
 		templates["master"] = Template(fd.read())
 	with open("./template/index_table_row.tpl") as fd:
 		templates["index_table_row"] = Template(fd.read())
 	with open("./template/index.tpl") as fd:
 		templates["index"] = Template(fd.read())
+	parsed   = urlparse(url)
+	_domain  = parsed.netloc
+	_uri     = parsed.path
 
 _bodyless_tags = ["img","br","input"]
 
@@ -158,7 +166,9 @@ class Html():
 	def __init__(self, title=None, body=None):
 		self.subs = {
 			"title":title,
-			"body":body
+			"body":body,
+			"domain":_domain,
+			"uri":_uri
 		}
 
 	def title(self, str):
@@ -178,6 +188,7 @@ class Html():
 
 class Html_Index(Html):
 	def __init__(self, path, index):
+		super().__init__()
 		self.path(path)
 		self.index(index)
 
@@ -192,7 +203,6 @@ class Html_Index(Html):
 		# build index rows
 		rows = []
 		for i in self.index:
-			print(i)
 			rows.append(templates['index_table_row'].substitute({
 			"icon_url":  "localhost",
 				"icon_alt":  "DIR",

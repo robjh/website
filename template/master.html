@@ -4,14 +4,13 @@
 	<meta http-equiv="Content-type" content="text/html; charset=utf-8" />
 	<meta name="viewport" content="width=device-width, initial-scale=0.8">
 	<title>${title}</title>
-	<link type="text/css" href="http://www.robjh.com/lib/style.css" rel="stylesheet" />
+	<link type="text/css" href="${uri}lib/style.css" rel="stylesheet" />
 </head>
 <body>
 <div id="master">
-	
 	<div id="site_header">
 		<div id="terminal">
-			guest@www.RobJH.com
+			guest@${domain}
 		</div>
 		<div id="header_hr"><hr></div>
 	</div>
@@ -20,11 +19,11 @@
 	</div>
 
 </div>
-<script src="http://www.robjh.com/lib/aojs/ao.js"></script>
+<script src="${uri}lib/aojs/ao.js"></script>
 <script type="text/javascript"><!--
 	var ao = ao_get().include('terminal');
 --></script>
-<script src="http://www.robjh.com/lib/robjh.js"></script>
+<script src="${uri}lib/robjh.js"></script>
 <script>
 
 
@@ -94,7 +93,7 @@
 			process_init_argv: {
 				fs:         fs,
 				pwd:        pwd,
-				hostname:   'www.RobJH.com',
+				hostname:   '${uri}',
 				username:   'guest',
 				args:       'echo "This is what happens when you prioritise showing off over SEO." | cowsay;',
 			}
