@@ -19,6 +19,7 @@ def load(url):
 	parsed   = urlparse(url)
 	_domain  = parsed.netloc
 	_uri     = parsed.path
+	if (_uri == "" or _uri[-1] != "/"): _uri += "/"
 
 _bodyless_tags = ["img","br","input"]
 
