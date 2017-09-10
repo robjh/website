@@ -144,9 +144,23 @@ def main():
 		with open(os.path.join(path.dest(path.SRC, path_src), "index.html"), 'w') as fd:
 			fd.write( template.Html_Index(path_src, index).render(minify=args.minify) )
 			if "index.html" in listing: listing.remove("index.html")
-		with open(os.path.join(path.dest(path.SRC, path_src), "index.json"), 'w') as fd:
+		with open(os.path.join(path.dest(path.SRC, path_src), "index.html.json"), 'w') as fd:
 			fd.write( json.dumps(index) )
-			if "index.json" in listing: listing.remove("index.json")
+			if "index.html.json" in listing: listing.remove("index.html.json")
+
+		# create default_ajax_action.json symlink
+		symlink = os.path.join(path.dest(path.SRC, path_src), "default_ajax_action.json")
+		symlink_dest = os.path.join(path.dest(path.SRC, path_src), "index.html.json")
+		if os.path.exists(symlink):
+			if not os.path.islink(symlink) or (os.readlink(symlink) != symlink_dest):
+				if os.path.isdir(symlink):
+					delete_with_extreme_prejudice(symlink)
+				else:
+					os.remove(symlink)
+				os.symlink(symlink_dest, symlink)
+		else:
+			os.symlink(symlink_dest, symlink)
+		if "default_ajax_action.json" in listing: listing.remove("default_ajax_action.json")
 
 		# remove any unexpected files in the web directory
 		for misc in listing:
