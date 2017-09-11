@@ -24,7 +24,7 @@ var robjh = (function() {
 		}
 		return supported;
 	})();
-	
+
 	var split_path = (function(fullpath) {
 		var loc = fullpath.lastIndexOf('/');
 		return {
@@ -50,12 +50,12 @@ var robjh = (function() {
 			"lib": { },
 			"usr": { "bin": {} },
 		};
-		
+
 		// controls the minimum time between directory refreshes
 		self.expires = argv.expires || 3600;
 
 		argv.node_class = argv.node_class || fs.node;
-		
+
 		self.root = argv.node_class({
 			fs: self,
 			node_class: argv.node_class
@@ -69,9 +69,9 @@ var robjh = (function() {
 			}
 		});
 		apply_structure(self.root, structure);
-		
+
 		if (argv.hint) {
-			self.root.apply_update_recursive(argv.hint); 
+			self.root.apply_update_recursive(argv.hint);
 		}
 		if (g.sessionStorage_works) {
 			var saved_fs = window.sessionStorage.getItem('fs');
@@ -89,7 +89,7 @@ var robjh = (function() {
 
 
 		(function(node) { // /bin/
-			
+
 			var pwd = ao.process_simple.wrapper("pwd", function(ctrl) {
 				ctrl.ostream([ctrl.shell.pwd(), ctrl.ostream.nl]);
 			});
@@ -122,12 +122,12 @@ var robjh = (function() {
 								]);
 								return p.exit();
 								break;
-		
+
 							  case '-i':
 							  case '--index':
 								force_index = true;
 								break;
-		
+
 							  default:
 								if (p.argv[i].startsWith('-')) {
 									self.ostream([p.argv[0]+': '+p.argv[i]+': Invalid option.', self.ostream.nl]);
@@ -139,7 +139,7 @@ var robjh = (function() {
 							}
 						}
 						return p.continue("setup");
-		
+
 					},
 					setup: function() {
 						argv.shell.cd_ajax(path, function(node, result) {
@@ -154,11 +154,11 @@ var robjh = (function() {
 						  case argv.shell.cd_ajax.result.not_found:
 							self.ostream([p.argv[0]+': '+path+': No such file or directory.', self.ostream.nl]);
 							break;
-		
+
 						  case argv.shell.cd_ajax.result.not_dir:
 							self.ostream([p.argv[0]+': '+path+': Not a directory.', self.ostream.nl]);
 							break;
-		
+
 						  case argv.shell.cd_ajax.result.ok:
 							if (!force_index && working_node.children['default.html']) {
 								working_node.path_resolve_ajax('default.html', function(node) {
@@ -169,11 +169,11 @@ var robjh = (function() {
 							} else
 								return p.continue("render_page");
 							break;
-		
+
 						  default:
 							self.ostream([p.argv[0]+': '+path+': Unknown Error.', self.ostream.nl]);
 						}
-						
+
 						return p.exit();
 					},
 					render_page: function() {
@@ -225,7 +225,7 @@ var robjh = (function() {
 								className: "lscmd"
 							});
 							self.ostream(ul);
-		
+
 							var keys = Object.keys(working_node.children).sort(function(a,b) {
 								if (working_node.children[a].type() == fs.types.dir) {
 									if (working_node.children[b].type() != fs.types.dir) {
@@ -246,7 +246,7 @@ var robjh = (function() {
 								) {
 									node = node.children['default.html'];
 								}
-		
+
 								var li = ao.dom_node('li', {
 									className: "lscmddir"
 								});
@@ -268,7 +268,7 @@ var robjh = (function() {
 								ul.appendChild(li);
 							}
 						}
-		
+
 						return p.exit();
 					},
 				}, argv.states);
@@ -308,7 +308,7 @@ var robjh = (function() {
 						} else {
 							self.ostream(working_node.gen_page());
 						}
-		
+
 						return p.exit();
 					},
 				}, argv.states);
@@ -340,7 +340,7 @@ var robjh = (function() {
 						return p.continue("create");
 					},
 					create: function() {
-						
+
 						if (!working_node) {
 							self.ostream([p.argv[0] + " cannot create directory '" + p.argv[1] + "': No such file or directory.", self.ostream.nl]);
 						} else if (working_node.children[new_dir_name]) {
@@ -353,7 +353,7 @@ var robjh = (function() {
 								g.page.reload();
 							}
 						}
-		
+
 						return p.exit();
 					}
 				}, argv.states);
@@ -380,15 +380,15 @@ var robjh = (function() {
 					]);
 					return;
 				}
-				
+
 				var name = node.name();
 				node = node.parent_get();
 				node.child_remove(name);
 				node.fs.save();
-				
+
 				if (g.page.node == node) g.page.reload();
 			});
-			
+
 			var cowsay = ao.process_simple.wrapper("cowsay", function(argv, p) {
 				if (!argv.istream.eof) {
 					this.yield = true;
@@ -416,7 +416,7 @@ var robjh = (function() {
 			var clear = ao.process_simple.wrapper("clear", function(ctrl, p) {
 				ctrl.term.clear();
 			});
-			
+
 			var empty = (function(argv, p) {
 				argv     = argv   || {};
 				p        = p      || {};
@@ -443,14 +443,14 @@ var robjh = (function() {
 			node.child_set("dir",     node.child_get('ls'));
 
 		}(self.root.path_resolve('/bin')));
-		
+
 		(function(node) { // /usr/bin/
-			
+
 			var cookies = (function(argv, p) {
 				argv     = argv   || {};
 				p        = p      || {};
 				p.name   = p.name || "cookies";
-			
+
 				p.usage = "Usage: cookies [options] [cookie name [cookie value [expiration offset]]]";
 				p.do_help = (function() {
 					self.ostream([
@@ -570,7 +570,7 @@ var robjh = (function() {
 						m_name   = p.argv[index + 1];
 						m_value  = p.argv[index + 2];
 						m_offset = p.argv[index + 3];
-						
+
 					});
 
 					return ret;
@@ -659,7 +659,7 @@ var robjh = (function() {
 				}, argv.states);
 
 				var self = ao.process_sm(argv, p);
-			
+
 				return self;
 			});
 
@@ -672,17 +672,17 @@ var robjh = (function() {
 				cleanup: function(self) {
 					self.yield = false;
 					return self.fnc.yield("setup");
-				}	
+				}
 			}});
-			
+
 			var sudo = (function() {
-				
+
 			});
-			
+
 			var uname = ao.process_simple.wrapper("uname", function(argv, p) {
 				this.ostream([navigator.userAgent, this.ostream.nl]);
 			});
-			
+
 			var hello_user = ao.process_simple.wrapper("hellouser", function(argv, p) {
 				var input = this.istream();
 				if (!input) {
@@ -694,7 +694,7 @@ var robjh = (function() {
 					this.ostream(["Hello ", input, ". ", this.ostream.nl]);
 				}
 			});
-			
+
 			var rewritepage = ao.process_simple.wrapper("page", function(argv, p) {
 				if (!this.istream.eof) {
 					this.yield = true;
@@ -709,7 +709,7 @@ var robjh = (function() {
 				void(node.fs);
 				debugger;
 			});
-			
+
 			node.child_set("cookies",     fs.element_exec({ constructor: cookies     }));
 			node.child_set("sudo",        fs.element_exec({ constructor: sudo        }));
 			node.child_set("uname",       fs.element_exec({ constructor: uname       }));
@@ -721,7 +721,7 @@ var robjh = (function() {
 		}(self.root.path_resolve('/usr/bin')));
 
 		(function(node) { // /lib
-			
+
 			node.child_set("ao.js", fs.element_blob({
 				url: "/lib/ao.js",
 				mime: "text/javascript",
@@ -745,10 +745,10 @@ var robjh = (function() {
 			}));
 
 		}(self.root.path_resolve('/lib')));
-		
+
 		return self;
 	});
-	
+
 	fs.types = {
 		'dir':  1,
 		'exec': 2,
@@ -791,7 +791,7 @@ var robjh = (function() {
 				self.children['default.html'] &&
 				self.children['default.html'].is_html
 			) {
-				append = "index.php";
+				append = "index.html";
 			}
 
 			while (node && node.local) {
@@ -854,7 +854,7 @@ var robjh = (function() {
 			ao.state_machine({ states: {
 				ajax_request: function(sm) {
 					var uri = self.url();
-					var query = "?query[update][action]=data&query[update][level]=1";
+					var query = ".json";
 					sm.xhr = new XMLHttpRequest();
 					sm.xhr.open('GET', encodeURI(uri+query));
 					sm.xhr.setRequestHeader("X-Requested-With", "xmlhttprequest");
@@ -871,7 +871,7 @@ var robjh = (function() {
 						// delete the parent node's reference to this node.
 						delete self.parent().children[self.name()];
 						break;
-					  
+
 					  case 200: // Ok.
 						var index = JSON.parse(sm.xhr.responseText);
 						console.log(index);
@@ -898,13 +898,13 @@ var robjh = (function() {
 					callback(sm.success);
 					return sm.yield("resolve_known");
 				}
-		
+
 			}})();
 		});
 
 		p.apply_update_generic = (function(update) {
 			self.local = (true == update.local);
-			
+
 			if (update.complete) {
 				self.updated = Date.now();
 			}
@@ -919,7 +919,7 @@ var robjh = (function() {
 						if (success) {
 							if (
 								self.is_dir &&
-								self.children['default.html'] && 
+								self.children['default.html'] &&
 								self.children['default.html'].is_html
 							) {
 								g.page.node_change(self.children['default.html']);
@@ -943,7 +943,7 @@ var robjh = (function() {
 		// virtual functions
 		self.apply_update_recursive = null;
 		self.serialise = null;
-		
+
 		return self;
 	});
 	fs.element_exec = (function(argv, p) {
@@ -954,7 +954,7 @@ var robjh = (function() {
 		var self = element_generic(argv, p);
 		self.is_exec = true;
 		self.local = true;
-	
+
 		self.create = (function() {
 			return argv.constructor;
 		});
@@ -971,7 +971,7 @@ var robjh = (function() {
 		p.type = fs.types.html;
 
 		var self = element_generic(argv, p);
-		
+
 		self.is_html = true;
 		self.linkable = true;
 		self.body;
@@ -1045,7 +1045,7 @@ var robjh = (function() {
 
 		self.apply_update_recursive = (function(update) {
 			if (update.type != 'file') return;
-			
+
 			p.mime = update.mime;
 			p.apply_update_generic(update);
 
@@ -1060,13 +1060,13 @@ var robjh = (function() {
 
 		self.gen_page = (function() {
 			var frag = document.createDocumentFragment();
-			
+
 			switch (self.mime()) {
 			  case "image/png":
 			  case "image/jpeg":
 			  case "image/svg+xml":
 				var imgid = "img" + Math.floor(Math.random()*1000000);
-				
+
 				frag.appendChild(ao.dom_node('div', {
 					appendChild: [
 						ao.dom_node('input', {
@@ -1077,7 +1077,7 @@ var robjh = (function() {
 						}),
 						ao.dom_node('label', {
 							appendChild: ao.dom_node('img', {
-								src: self.realpath() 
+								src: self.realpath()
 							}),
 							"htmlFor": imgid
 						})
@@ -1089,7 +1089,7 @@ var robjh = (function() {
 			  case "image/svg+xml":
 				// the file will have to be downloaded at some point
 				break;
-			}	
+			}
 			return frag;
 		});
 
@@ -1178,8 +1178,8 @@ var robjh = (function() {
 					if (sm.path.length) {
 						uri += sm.path.join('/');
 					}
-					if (force && !uri.endsWith("/index.php")) uri += "index.php";
-					var query = "?query[update][action]=data&query[update][level]=1";
+					if (force && !uri.endsWith("/index.html")) uri += "index.html";
+					var query = ".json";
 					sm.xhr = new XMLHttpRequest();
 					sm.xhr.open('GET', encodeURI(uri+query));
 					sm.xhr.setRequestHeader("X-Requested-With", "xmlhttprequest");
@@ -1196,7 +1196,7 @@ var robjh = (function() {
 						delete sm.node.children[".."].children[sm.node.name()];
 						sm.node = null;
 						break;
-					  
+
 					  case 200: // Ok.
 						try {
 							var index = JSON.parse(sm.xhr.responseText);
@@ -1229,7 +1229,7 @@ var robjh = (function() {
 						sm.node = null;
 						return sm.fnc.continue("run_callbacks");
 						break;
-					  
+
 					  case 200: // Ok.
 						// create all the imcomplete directories up to the new data.
 						for (var i = 0, l = sm.path.length ; i < l-1 ; ++i) {
@@ -1238,7 +1238,7 @@ var robjh = (function() {
 						var name = sm.path[sm.path.length - 1];
 						try {
 							var index = JSON.parse(sm.xhr.responseText);
-							
+
 							if (index.update.status == 200) {
 								sm.node = sm.node.apply_update_as_child(name, index.update.body);
 							} else {
@@ -1358,7 +1358,7 @@ var robjh = (function() {
 			return self.children['..'];
 		});
 		self.path = (function() {
-			var node = self; 
+			var node = self;
 			var path = '';
 			do {
 				path = node.name() + '/' + path;
@@ -1401,7 +1401,7 @@ var robjh = (function() {
 			delete self.children[name];
 			return ret;
 		});
-		
+
 		self.has_local_content = (function() {
 			if (self.local) return true;
 
@@ -1448,13 +1448,13 @@ var robjh = (function() {
 				append = true;
 			}
 			if (append) ret.children = children;
-			
+
 			return ret;
 		});
 
 		self.gen_page = (function() {
 			var frag = document.createDocumentFragment();
-			
+
 			var build_breadcrumb_recursive = function(node, append) {
 				if (node.children['..']) {
 					build_breadcrumb_recursive(node.children['..'], append);
@@ -1462,7 +1462,7 @@ var robjh = (function() {
 				append.appendChild(ao.dom_node('a', {
 					href:     node.url(),
 					text:     node.name() + '/',
-					onclick:  node.event_click	
+					onclick:  node.event_click
 				}));
 			};
 
@@ -1544,7 +1544,7 @@ var robjh = (function() {
 						type: child.mime()
 					}));
 					break;
-				
+
 				  case fs.types.exec:
 					table.appendChild(row({
 						icon_src: '/icons/binary.png',
@@ -1553,7 +1553,7 @@ var robjh = (function() {
 						type: child.mime()
 					}));
 					break;
-				
+
 				  case fs.types.html:
 					table.appendChild(row({
 						icon_src: '/icons/layout.png',
@@ -1601,24 +1601,24 @@ var robjh = (function() {
 			}
 
 			frag.appendChild(table)
-			
+
 			return frag;
 		});
 
 		return self;
 	});
-	
+
 	var shell = (function(argv, p) {
 		argv     = argv || {};
 		p        = p    || {};
 		var self = ao.shell(argv, p);
-		
+
 		p.fs = p.fs || argv.fs || argv.pwd.fs;
 		p.pwd = argv.pwd || p.fs.root;
 
 		argv.hostname = argv.hostname || "localhost";
 		p.env['PATH'] = argv.path || '/bin/:/usr/bin/';
-		
+
 		self.prompt = (function() {
 			var user = argv.username ? argv.username + "@" : "";
 			return ao.dom_node('span', {
@@ -1683,7 +1683,7 @@ var robjh = (function() {
 				}
 			}
 		});
-		
+
 		if (g.page)
 			g.page.callback_url_update_register(p.go_to_node);
 
@@ -1696,7 +1696,7 @@ var robjh = (function() {
 
 		return self;
 	});
-	
+
 	// this object is reponsible for changing the contents of the page and managing the url.
 	var page = (function(argv, p) {
 		argv     = argv || {};
@@ -1714,7 +1714,7 @@ var robjh = (function() {
 		self.set_this_global = (function() {
 			g.page = self;
 		});
-		
+
 		self.fix_initial_history = (function(node) {
 			self.node = node;
 			history.replaceState(node.path(), "Index of " + node.path(), node.url());
@@ -1725,7 +1725,7 @@ var robjh = (function() {
 			return token_generator++;
 		});
 
-		
+
 		self.callback_url_update_register = (function(callback) {
 			var token = p.new_token();
 			p.callbacks_url_change[token] = callback;
@@ -1747,7 +1747,7 @@ var robjh = (function() {
 			var content = self.node.gen_page();
 
 			self.content_replace(content);
-			p.callback_url_update_exec(self.node); 
+			p.callback_url_update_exec(self.node);
 		});
 		if (argv.global) {
 			window.onpopstate = p.onpopstate;
@@ -1776,12 +1776,12 @@ var robjh = (function() {
 
 			if (!stayput) {
 				history.pushState(node.pwd(), "Index of " + node.pwd(), node.url());
-				p.callback_url_update_exec(node); 
+				p.callback_url_update_exec(node);
 			}
 
 			self.content_replace(p.gen_index_page(node));
 		});
-		
+
 		self.dir_change_inplace = (function(node) {
 			self.node = node;
 			self.content_replace(p.gen_index_page(node));
@@ -1791,18 +1791,18 @@ var robjh = (function() {
 		self.node_change = (function(node) {
 
 			self.node = node;
-			var content = node.gen_page(); 
+			var content = node.gen_page();
 			content = self.node.gen_page();
 
 			document.title = node.title();
 			history.pushState(node.path(), node.title(), node.url());
 			self.content_replace(content);
-			p.callback_url_update_exec(node); 
+			p.callback_url_update_exec(node);
 		});
 
 		self.node_change_inplace = (function(node) {
 			self.node = node;
-			var content = node.gen_page(); 
+			var content = node.gen_page();
 			self.content_replace(content);
 			document.title = node.title();
 			history.replaceState(node.path(), node.title(), node.url());
@@ -1820,6 +1820,6 @@ var robjh = (function() {
 	rob.fs = fs;
 	rob.shell = shell;
 	rob.page = page;
-	
+
 	return rob;
 })();
