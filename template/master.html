@@ -4,7 +4,7 @@
 	<meta http-equiv="Content-type" content="text/html; charset=utf-8" />
 	<meta name="viewport" content="width=device-width, initial-scale=0.8">
 	<title>${title}</title>
-	<link type="text/css" href="${uri}lib/style.css" rel="stylesheet" />
+	<link type="text/css" href="${uri}/lib/style.css" rel="stylesheet" />
 </head>
 <body>
 <div id="master">
@@ -19,24 +19,23 @@
 	</div>
 
 </div>
-<script src="${uri}lib/aojs/ao.js"></script>
+<script src="${uri}/lib/aojs/ao.js"></script>
 <script type="text/javascript">
 	var ao = ao_get().include('terminal');
 </script>
-<script src="${uri}lib/robjh.js"></script>
+<script src="${uri}/lib/robjh.js"></script>
 <script>
 'use strict';
 
 
 	ao.ready(function() {
 
-		var site_root = "${uri}";
 		var fs = robjh.fs({
-			chroot:  site_root,
+			chroot:  "${uri}",
 			hint:   {"type":"dir","children":{"mnt":{"type":"dir"},"about":{"type":"dir"},"var":{"type":"dir"},"home":{"type":"dir"},"lib":{"type":"dir"},"usr":{"type":"dir"},"bin":{"type":"dir"}},"complete":true}
 		});
 
-		var path = window.location.pathname.substr(site_root.length);
+		var path = window.location.pathname.substr(fs.chroot.length);
 		var index_specified = path.endsWith("index.php");
 		if (index_specified) {
 			path = path.substring(0, path.length - 9);

@@ -4,6 +4,7 @@ import argparse
 import os
 import json
 import css_html_js_minify
+import mimetypes
 from pprint import pprint
 
 import template
@@ -124,7 +125,7 @@ def main():
 					continue
 				if config["files"][mutualpath]["action"] == "raw":
 					path.copy_file(mutualpath)
-					index.append({"name":file})
+					index.append({"name":file, "type":mimetypes.MimeTypes().guess_type(file)[0]})
 					if file in listing: listing.remove(file)
 					continue
 

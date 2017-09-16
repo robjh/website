@@ -20,7 +20,7 @@ def load(url):
 	parsed   = urlparse(url)
 	_domain  = parsed.netloc
 	_uri     = parsed.path
-	if (_uri == "" or _uri[-1] != "/"): _uri += "/"
+	while (_uri and _uri[-1] == "/"): _uri = _uri[:-1]
 
 _bodyless_tags = ["img","br","input"]
 
@@ -213,10 +213,10 @@ class Html_Index(Html):
 			rows.append(templates['index_table_row'].substitute({
 			"icon_url":  "localhost",
 				"icon_alt":  "DIR",
-				"href":      "localhost",
-				"data_path": "/",
+				"href":      "{}/{}".format(_uri, i["name"]),
+				"data_path": "/{}".format(i["name"]),
 				"data_type": "dir",
-				"type":      "directory",
+				"type":      i["type"],
 				"text":      i["name"]
 			}))
 		self.subs["body"] = templates["index"].substitute({
