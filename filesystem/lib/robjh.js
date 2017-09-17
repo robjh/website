@@ -45,12 +45,6 @@ var robjh = (function() {
 
 		self.chroot = argv.chroot;
 
-		var structure = {
-			"bin": { },
-			"lib": { },
-			"usr": { "bin": {} },
-		};
-
 		// controls the minimum time between directory refreshes
 		self.expires = argv.expires || 3600;
 
@@ -60,16 +54,6 @@ var robjh = (function() {
 			fs: self,
 			node_class: argv.node_class
 		});
-		var apply_structure = (function(node, structure) {
-			for (var name in structure) {
-				node.mkdir(name);
-				if (structure[name]) {
-					apply_structure(node.children[name], structure[name]);
-				}
-			}
-		});
-		apply_structure(self.root, structure);
-
 		if (argv.hint) {
 			self.root.apply_update_recursive(argv.hint);
 		}
@@ -86,7 +70,6 @@ var robjh = (function() {
 			console.log(node_data);
 			return true;
 		});
-
 
 		(function(node) { // /bin/
 /*{{{*/
@@ -442,7 +425,7 @@ var robjh = (function() {
 
 			node.child_set("dir",     node.child_get('ls'));
 /*}}}*/
-		}(self.root.path_resolve('/bin')));
+		}(self.root.path_resolve_create('/bin', 'dir')));
 
 		(function(node) { // /usr/bin/
 /*{{{*/
@@ -718,12 +701,12 @@ var robjh = (function() {
 //			node.child_set("ajax",        fs.element_exec({ constructor: ajax        }));
 			node.child_set("localdata",   fs.element_exec({ constructor: local_data  }));
 			node.child_set("breakpoint",  fs.element_exec({ constructor: breakpoint  }));/*}}}*/
-		}(self.root.path_resolve('/usr/bin')));
+		}(self.root.path_resolve_create('/usr/bin', 'dir')));
 
 		(function(node) { // /lib
 /*{{{*/
 			node.child_set("ao.js", fs.element_blob({
-				url: "/lib/ao.js",
+				url: "/lib/aojs/ao.js",
 				mime: "text/javascript",
 				fs: node.fs,
 				local: true,
@@ -744,7 +727,7 @@ var robjh = (function() {
 				parent: node,
 			}));
 /*}}}*/
-		}(self.root.path_resolve('/lib')));
+		}(self.root.path_resolve_create('/lib', 'dir')));
 
 		return self;
 	});
@@ -1144,10 +1127,8 @@ var robjh = (function() {
 		self.path_resolve = (function(path) {
 			return path_resolve_common(path);
 		});
-		self.create_node = (function(path, type) {
-			exists = true;
-			node = path_resolve_common(path, function(node, path_arr, i) {
-				exists = false;
+		self.path_resolve_create = (function(path, type) {
+			return path_resolve_common(path, function(node, path_arr, i) {
 				if (i + 1 < path_arr.length) {
 					return node.mkdir(path_arr[i]);
 				} else {
@@ -1166,7 +1147,6 @@ var robjh = (function() {
 					}
 				}
 			});
-			return exists ? null : node;
 		});
 		self.path_resolve_ajax = (function(path, callback, force) {
 			force = (force == true);

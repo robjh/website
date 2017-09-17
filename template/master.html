@@ -71,7 +71,7 @@
 				var type = a_arr[i].getAttribute('data-type');
 
 				if (path) {
-					var node = pwd.path_resolve(path) || pwd.create_node(path, type);
+					var node = pwd.path_resolve_create(path, type);
 
 					if (node.type() == robjh.fs.types[type]) {
 						a_arr[i].addEventListener('click', node.event_click);
