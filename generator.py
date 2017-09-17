@@ -138,7 +138,7 @@ def main():
 
 				with open(path.dest(path.MUTUAL, mutualpath), 'w') as fd:
 					fd.write(page.render(minify=args.minify))
-				index.append({"name":file, "type":"text/html"})
+				index.append({"name":file, "type":"html"})
 			print("/"+mutualpath)
 
 		# create index pages

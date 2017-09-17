@@ -703,7 +703,7 @@ var robjh = (function() {
 			node.child_set("breakpoint",  fs.element_exec({ constructor: breakpoint  }));/*}}}*/
 		}(self.root.path_resolve_create('/usr/bin', 'dir')));
 
-		(function(node) { // /lib
+		(function(node) { // /lib/
 /*{{{*/
 			node.child_set("ao.js", fs.element_blob({
 				url: "/lib/aojs/ao.js",
@@ -1136,6 +1136,7 @@ var robjh = (function() {
 					  case "dir":
 					  case "directory":
 						return node.mkdir(path_arr[i])
+					  case "html":
 					  case "text/html":
 						return self.children[path_arr[i]] = fs.element_html({
 							parent: self,
@@ -1423,29 +1424,6 @@ var robjh = (function() {
 
 			return false;
 		});
-/*
-		// attach this to the onclick events of items that lead to this node
-		self.event_click = (function(e) {
-			e = e || window.event;
-			window.setTimeout(function() {
-				if (!self.local && self.updated + self.fs.expires < Date.now()) {
-					self.update_ajax(function(success) {
-						if (success) {
-							g.page.node_change(self);
-						} else {
-						// the ajax failed so perform the default link action
-							window.location = self.fs.chroot + self.pwd();
-						}
-					});
-				} else {
-					g.page.dir_change(self);
-				}
-			}, 0);
-			e.preventDefault();
-			e.stopPropagation();
-			return false;
-		});
-//*/
 		self.serialise = (function() {
 			var ret = p.serialise_generic();
 

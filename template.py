@@ -215,7 +215,7 @@ class Html_Index(Html):
 				"icon_alt":  "DIR",
 				"href":      "{}/{}".format(_uri, i["name"]),
 				"data_path": "/{}".format(i["name"]),
-				"data_type": "dir",
+				"data_type": i["type"],
 				"type":      i["type"],
 				"text":      i["name"]
 			}))
