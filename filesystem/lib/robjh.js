@@ -89,7 +89,7 @@ var robjh = (function() {
 
 
 		(function(node) { // /bin/
-
+/*{{{*/
 			var pwd = ao.process_simple.wrapper("pwd", function(ctrl) {
 				ctrl.ostream([ctrl.shell.pwd(), ctrl.ostream.nl]);
 			});
@@ -441,11 +441,11 @@ var robjh = (function() {
 			node.child_set("clear",   fs.element_exec({ constructor: clear   }));
 
 			node.child_set("dir",     node.child_get('ls'));
-
+/*}}}*/
 		}(self.root.path_resolve('/bin')));
 
 		(function(node) { // /usr/bin/
-
+/*{{{*/
 			var cookies = (function(argv, p) {
 				argv     = argv   || {};
 				p        = p      || {};
@@ -717,11 +717,11 @@ var robjh = (function() {
 			node.child_set("page",        fs.element_exec({ constructor: rewritepage }));
 //			node.child_set("ajax",        fs.element_exec({ constructor: ajax        }));
 			node.child_set("localdata",   fs.element_exec({ constructor: local_data  }));
-			node.child_set("breakpoint",  fs.element_exec({ constructor: breakpoint  }));
+			node.child_set("breakpoint",  fs.element_exec({ constructor: breakpoint  }));/*}}}*/
 		}(self.root.path_resolve('/usr/bin')));
 
 		(function(node) { // /lib
-
+/*{{{*/
 			node.child_set("ao.js", fs.element_blob({
 				url: "/lib/ao.js",
 				mime: "text/javascript",
@@ -743,7 +743,7 @@ var robjh = (function() {
 				local: true,
 				parent: node,
 			}));
-
+/*}}}*/
 		}(self.root.path_resolve('/lib')));
 
 		return self;
@@ -1120,7 +1120,7 @@ var robjh = (function() {
 			return self.children['..'] || null;
 		});
 
-		self.path_resolve = (function(path) {
+		var path_resolve_common = (function(path, on_notfound = undefined) {
 			var node = self;
 			path = decodeURI(path).split('/');
 			if (path[0] == '') {
@@ -1131,10 +1131,42 @@ var robjh = (function() {
 				if (node.children[path[i]]) {
 					node = node.children[path[i]];
 				} else {
-					return;
+					if (on_notfound) {
+						node = on_notfound(node, path, i);
+						if (!node) return
+					} else {
+						return;
+					}
 				}
 			}
 			return node;
+		});
+		self.path_resolve = (function(path) {
+			return path_resolve_common(path);
+		});
+		self.create_node = (function(path, type) {
+			exists = true;
+			node = path_resolve_common(path, function(node, path_arr, i) {
+				exists = false;
+				if (i + 1 < path_arr.length) {
+					return node.mkdir(path_arr[i]);
+				} else {
+					switch (type) {
+					  case "dir":
+					  case "directory":
+						return node.mkdir(path_arr[i])
+					  case "text/html":
+						return self.children[path_arr[i]] = fs.element_html({
+							parent: self,
+							name: path_arr[i],
+							fs: self.fs
+						});
+					  default:
+						return null;
+					}
+				}
+			});
+			return exists ? null : node;
 		});
 		self.path_resolve_ajax = (function(path, callback, force) {
 			force = (force == true);

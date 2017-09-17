@@ -32,7 +32,6 @@
 
 		var fs = robjh.fs({
 			chroot:  "${uri}",
-			hint:   {"type":"dir","children":{"mnt":{"type":"dir"},"about":{"type":"dir"},"var":{"type":"dir"},"home":{"type":"dir"},"lib":{"type":"dir"},"usr":{"type":"dir"},"bin":{"type":"dir"}},"complete":true}
 		});
 
 		var path = window.location.pathname.substr(fs.chroot.length);
@@ -63,7 +62,7 @@
 			page.node_change_inplace(target);
 		} else {
 
-			/* setup onclick events for links. */
+			/* expand the filesystem model, and setup onclick events for links. */
 			var a_arr = Array.prototype.slice.call(
 				document.getElementById('site_container').getElementsByTagName('a')
 			);
@@ -72,7 +71,7 @@
 				var type = a_arr[i].getAttribute('data-type');
 
 				if (path) {
-					var node = pwd.path_resolve(path);
+					var node = pwd.path_resolve(path) || pwd.create_node(path, type);
 
 					if (node.type() == robjh.fs.types[type]) {
 						a_arr[i].addEventListener('click', node.event_click);
