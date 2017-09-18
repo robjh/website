@@ -1191,10 +1191,22 @@ var robjh = (function() {
 					if (sm.path.length) {
 						uri += sm.path.join('/');
 					}
-					if (force && !uri.endsWith("/index.html")) uri += "index.html";
-					var query = ".json";
+
+					// if the last char is a /, this is a directory.
+					// if theres no '.' after the last '/', this is probably a directory
+					// if the end of uri is .html, this is a html document and we should request the json version
+					var append = "";
+					if (
+						uri[uri.length-1] == '/' ||
+						uri.lastIndexOf('/') > uri.lastIndexOf('.')
+					) {
+						append = (force ? "/index.html.json" : "/default_ajax_action.json");
+					} else if (/.html^/.test(uri)) {
+						append = ".json";
+					}
+
 					sm.xhr = new XMLHttpRequest();
-					sm.xhr.open('GET', encodeURI(uri+query));
+					sm.xhr.open('GET', encodeURI(uri + append));
 					sm.xhr.setRequestHeader("X-Requested-With", "xmlhttprequest");
 					sm.xhr.setRequestHeader('Content-Type', 'application/json; charset=UTF-8');
 					sm.xhr.onload = sm;

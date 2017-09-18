@@ -151,8 +151,9 @@ def main():
 
 		# create default_ajax_action.json symlink
 		symlink = os.path.join(path.dest(path.SRC, path_src), "default_ajax_action.json")
-		symlink_dest = os.path.join(path.dest(path.SRC, path_src), "index.html.json")
+		symlink_dest = "./index.html.json"
 		if os.path.exists(symlink):
+			delete_with_extreme_prejudice(symlink)
 			if not os.path.islink(symlink) or (os.readlink(symlink) != symlink_dest):
 				if os.path.isdir(symlink):
 					delete_with_extreme_prejudice(symlink)
