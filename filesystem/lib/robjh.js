@@ -1262,17 +1262,9 @@ var robjh = (function() {
 						}
 						var name = sm.path[sm.path.length - 1];
 						try {
-							var index = JSON.parse(sm.xhr.responseText);
+							var update = JSON.parse(sm.xhr.responseText);
 
-							if (index.update.status == 200) {
-								sm.node = sm.node.apply_update_as_child(name, index.update.body);
-							} else {
-								console.error(
-									"Error requesting index data from the server.",
-									index.update
-								);
-								sm.node = null;
-							}
+							sm.node = sm.node.apply_update_as_child(name, update);
 						} catch (e) {
 							// the server didnt reply with json. this must be a file!
 							sm.node = sm.node.children[sm.path[0]] = fs.element_file({
