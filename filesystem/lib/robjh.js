@@ -1263,7 +1263,6 @@ var robjh = (function() {
 						var name = sm.path[sm.path.length - 1];
 						try {
 							var update = JSON.parse(sm.xhr.responseText);
-
 							sm.node = sm.node.apply_update_as_child(name, update);
 						} catch (e) {
 							// the server didnt reply with json. this must be a file!

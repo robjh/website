@@ -91,7 +91,8 @@ def main():
 	parser.add_argument('--skel', help='A directory containing the skeleton of the website.')
 	parser.add_argument('--webdir', help='Directory where the site will be rendered to.')
 	parser.add_argument('--url', help='The web facing address of --webdir')
-	parser.add_argument('--minify', action="store_true", help='Runs HTML, Javascript and CSS files through a minifier.')
+	parser.add_argument('--minify', action='store_true', help='Runs HTML, Javascript and CSS files through a minifier.')
+	parser.add_argument('--redirect', choices=['none', 'htaccess', 'symlink'], help='Choose how to redirect default_ajax_action.json to the right file for every directory. If "none" is chosen, you should make arrangements to perform the redirects some other way. eg, modifying the server config', default='htaccess')
 	args = parser.parse_args()
 	path = Path_Reformatter(src=args.skel, dest=args.webdir)
 
@@ -106,6 +107,7 @@ def main():
 
 		listing = os.listdir( path.dest(path.SRC, path_src) )
 		index = []
+		has_defaulthtml = False
 
 		print("/"+path.mutual(path.SRC, path_src))
 
@@ -152,19 +154,31 @@ def main():
 			}))
 			if "index.html.json" in listing: listing.remove("index.html.json")
 
-		# create default_ajax_action.json symlink
-		symlink = os.path.join(path.dest(path.SRC, path_src), "default_ajax_action.json")
-		symlink_dest = "./index.html.json"
-		if os.path.exists(symlink):
-			if not os.path.islink(symlink) or (os.readlink(symlink) != symlink_dest):
-				if os.path.isdir(symlink):
-					delete_with_extreme_prejudice(symlink)
-				else:
-					os.remove(symlink)
+		if args.redirect == "symlink":
+			# create default_ajax_action.json symlink
+			symlink = os.path.join(path.dest(path.SRC, path_src), "default_ajax_action.json")
+			symlink_dest = "./index.html.json"
+			if has_defaulthtml:
+				symlink_dest = "./default.html.json"
+			if os.path.exists(symlink):
+				if not os.path.islink(symlink) or (os.readlink(symlink) != symlink_dest):
+					if os.path.isdir(symlink):
+						delete_with_extreme_prejudice(symlink)
+					else:
+						os.remove(symlink)
+					os.symlink(symlink_dest, symlink)
+			else:
 				os.symlink(symlink_dest, symlink)
-		else:
-			os.symlink(symlink_dest, symlink)
-		if "default_ajax_action.json" in listing: listing.remove("default_ajax_action.json")
+			if "default_ajax_action.json" in listing: listing.remove("default_ajax_action.json")
+		elif args.redirect == "htaccess" and path.mutual(path.SRC, path_src) == "":
+			with open(path.dest(path.MUTUAL, ".htaccess"), 'w') as fd:
+				fd.write("""RewriteEngine On
+
+RewriteCond %{DOCUMENT_ROOT}/$1default.html.json -f
+RewriteRule ^(.*/)?default_ajax_action.json$ $1default.html.json [L]
+RewriteRule ^(.*/)?default_ajax_action.json$ $1index.html.json [L]
+""")
+				if ".htaccess" in listing: listing.remove(".htaccess")
 
 		# remove any unexpected files in the web directory
 		for misc in listing:
