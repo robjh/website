@@ -31,9 +31,9 @@ def delete_with_extreme_prejudice(path):
 	else:
 		for root, dirs, files in os.walk(path, topdown = False):
 			for file in files:
-				os.remove(file)
+				os.remove(os.path.join(root,file))
 			for dir in dirs:
-				os.rmdir(dir)
+				os.rmdir(os.path.join(root,dir))
 		os.rmdir(path)
 
 class Path_Reformatter:
@@ -67,6 +67,9 @@ class Path_Reformatter:
 		elif type == self.DEST:
 			return path[self.dir_dest_len:]
 		raise ValueError("Unrecognised type. Must be one of SRC, MUTUAL, DEST")
+
+	def absolute(self, type, path):
+		return "/" + self.mutual(type, path)
 
 	def dest(self, type, path):
 		if type == self.SRC:
@@ -127,7 +130,7 @@ def main():
 					continue
 				if config["files"][mutualpath]["action"] == "raw":
 					path.copy_file(mutualpath)
-					index.append({"name":file, "type":mimetypes.MimeTypes().guess_type(file)[0]})
+					index.append({"name":file, "type":"file"})
 					if file in listing: listing.remove(file)
 					continue
 
@@ -145,12 +148,15 @@ def main():
 
 		# create index pages
 		with open(os.path.join(path.dest(path.SRC, path_src), "index.html"), 'w') as fd:
-			fd.write( template.Html_Index(path_src, index).render(minify=args.minify) )
+			fd.write( template.Html_Index(path.absolute(path.SRC, path_src), index).render(minify=args.minify) )
 			if "index.html" in listing: listing.remove("index.html")
 		with open(os.path.join(path.dest(path.SRC, path_src), "index.html.json"), 'w') as fd:
+			json_index = {}
+			for item in index:
+				json_index[item['name']] = item
 			fd.write(json.dumps({
 				"type":"dir",
-				"children":index
+				"children":json_index
 			}))
 			if "index.html.json" in listing: listing.remove("index.html.json")
 

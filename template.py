@@ -201,6 +201,7 @@ class Html_Index(Html):
 
 	def path(self, str):
 		self.title("index of "+str)
+		self._path = str
 
 	def index(self, index):
 		self.index = index
@@ -213,8 +214,8 @@ class Html_Index(Html):
 			rows.append(templates['index_table_row'].substitute({
 			"icon_url":  "localhost",
 				"icon_alt":  "DIR",
-				"href":      "{}/{}".format(_uri, i["name"]),
-				"data_path": "/{}".format(i["name"]),
+				"href":      "/{}{}/{}".format(_uri, self._path, i["name"]),
+				"data_path": "{}/{}".format(self._path, i["name"]),
 				"data_type": i["type"],
 				"type":      i["type"],
 				"text":      i["name"]

@@ -703,32 +703,6 @@ var robjh = (function() {
 			node.child_set("breakpoint",  fs.element_exec({ constructor: breakpoint  }));/*}}}*/
 		}(self.root.path_resolve_create('/usr/bin', 'dir')));
 
-		(function(node) { // /lib/
-/*{{{*/
-			node.child_set("ao.js", fs.element_blob({
-				url: "/lib/aojs/ao.js",
-				mime: "text/javascript",
-				fs: node.fs,
-				local: true,
-				parent: node,
-			}));
-			node.child_set("robjh.js", fs.element_blob({
-				url: "/lib/robjh.js",
-				mime: "text/javascript",
-				fs: node.fs,
-				local: true,
-				parent: node,
-			}));
-			node.child_set("style.css", fs.element_blob({
-				url: "/lib/style.css",
-				mime: "text/css",
-				fs: node.fs,
-				local: true,
-				parent: node,
-			}));
-/*}}}*/
-		}(self.root.path_resolve_create('/lib', 'dir')));
-
 		return self;
 	});
 
@@ -837,9 +811,23 @@ var robjh = (function() {
 			ao.state_machine({ states: {
 				ajax_request: function(sm) {
 					var uri = self.url();
-					var query = ".json";
+
+					// if the last char is a /, this is a directory.
+					// if theres no '.' after the last '/', this is probably a directory
+					// if the end of uri is .html, this is a html document and we should request the json version
+					var append = "";
+					if (
+						uri[uri.length-1] == '/'
+					) {
+						append = "default_ajax_action.json";
+					} else if (uri.lastIndexOf('/') > uri.lastIndexOf('.')) {
+						append = "/default_ajax_action.json";
+					} else if (/.html^/.test(uri)) {
+						append = ".json";
+					}
+
 					sm.xhr = new XMLHttpRequest();
-					sm.xhr.open('GET', encodeURI(uri+query));
+					sm.xhr.open('GET', encodeURI(uri + append));
 					sm.xhr.setRequestHeader("X-Requested-With", "xmlhttprequest");
 					sm.xhr.setRequestHeader('Content-Type', 'application/json; charset=UTF-8');
 					sm.xhr.onload = sm;
@@ -858,16 +846,9 @@ var robjh = (function() {
 					  case 200: // Ok.
 						var index = JSON.parse(sm.xhr.responseText);
 						console.log(index);
-						if (index.update.status == 200) {
-							self.apply_update_recursive(index.update.body);
-							self.fs.save();
-							sm.success = true;
-						} else {
-							console.error(
-								"Error requesting index data from the server.",
-								index.update
-							);
-						}
+						self.apply_update_recursive(index);
+						self.fs.save();
+						sm.success = true;
 						break;
 					  default:
 						console.error("Received an unknown status from the server. ", xm.xhr);
@@ -1143,6 +1124,12 @@ var robjh = (function() {
 							name: path_arr[i],
 							fs: self.fs
 						});
+					  case "file":
+						return self.children[path_arr[i]] = fs.element_file({
+							parent: self,
+							name: path_arr[i],
+							fs: self.fs
+						});
 					  default:
 						return null;
 					}
@@ -1197,10 +1184,11 @@ var robjh = (function() {
 					// if the end of uri is .html, this is a html document and we should request the json version
 					var append = "";
 					if (
-						uri[uri.length-1] == '/' ||
-						uri.lastIndexOf('/') > uri.lastIndexOf('.')
+						uri[uri.length-1] == '/'
 					) {
-						append = (force ? "/index.html.json" : "/default_ajax_action.json");
+						append = "default_ajax_action.json";
+					} else if (uri.lastIndexOf('/') > uri.lastIndexOf('.')) {
+						append = "/default_ajax_action.json";
 					} else if (/.html^/.test(uri)) {
 						append = ".json";
 					}
@@ -1224,16 +1212,9 @@ var robjh = (function() {
 
 					  case 200: // Ok.
 						try {
-							var index = JSON.parse(sm.xhr.responseText);
-							console.log(index);
-							if (index.update.status == 200) {
-								sm.node.apply_update_recursive(index.update.body);
-							} else {
-								console.error(
-									"Error requesting index data from the server.",
-									index.update
-								);
-							}
+							var update = JSON.parse(sm.xhr.responseText);
+							console.log(update);
+							sm.node.apply_update_recursive(update);
 						} catch (e) {
 							console.error(
 								"A resource exists on the server but the resource did not return json."
@@ -1318,7 +1299,8 @@ var robjh = (function() {
 				});
 				break;
 			  default:
-				console.error(update.children[child].type + ": unhandled type");
+				console.error(update.type + ": unhandled type");
+				return self.children[name];
 				break;
 			}
 			self.children[name].apply_update_recursive(update);
