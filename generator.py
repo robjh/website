@@ -137,12 +137,16 @@ def main():
 			if file in listing: listing.remove(file)
 
 			if ext == ".html":
+				if file+".json" in listing: listing.remove(file+".json")
 				page = template.Html()
 				with open(path.src(path.MUTUAL, mutualpath), 'r') as fd:
 					page.parse(fd.read())
 
 				with open(path.dest(path.MUTUAL, mutualpath), 'w') as fd:
 					fd.write(page.render(minify=args.minify))
+
+				with open(path.dest(path.MUTUAL, mutualpath) + ".json", 'w') as fd:
+					fd.write(json.dumps(page.as_dict(minify=args.minify)))
 				index.append({"name":file, "type":"html"})
 			print("/"+mutualpath)
 
@@ -183,6 +187,8 @@ def main():
 RewriteCond %{DOCUMENT_ROOT}/$1default.html.json -f
 RewriteRule ^(.*/)?default_ajax_action.json$ $1default.html.json [L]
 RewriteRule ^(.*/)?default_ajax_action.json$ $1index.html.json [L]
+
+DirectoryIndex default.html index.html
 """)
 				if ".htaccess" in listing: listing.remove(".htaccess")
 

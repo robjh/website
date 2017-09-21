@@ -193,6 +193,13 @@ class Html():
 			return html_minify(doc)
 		return doc
 
+	def as_dict(self, minify):
+		return {
+			"type":  "html",
+			"title": self.subs["title"],
+			"body":  html_minity(self.subs["body"]) if minify else str(self.subs["body"])
+		}
+
 class Html_Index(Html):
 	def __init__(self, path, index):
 		super().__init__()

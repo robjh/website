@@ -733,6 +733,9 @@ var robjh = (function() {
 		self.lessthan = (function(other) {
 			return argv.name < other.name();
 		});
+		self.title = (function() {
+			return self.path();
+		});
 		self.linkable = false;
 		self.url = (function() {
 			var node = self;
@@ -822,7 +825,10 @@ var robjh = (function() {
 						append = "default_ajax_action.json";
 					} else if (uri.lastIndexOf('/') > uri.lastIndexOf('.')) {
 						append = "/default_ajax_action.json";
-					} else if (/.html^/.test(uri)) {
+					} else if (/index.html$/.test(uri)) {
+						append = "/default_ajax_action.json";
+						uri = uri.substr(0, uri.length - 10);
+					} else if (/.html$/.test(uri)) {
 						append = ".json";
 					}
 
@@ -949,9 +955,9 @@ var robjh = (function() {
 					// need to delay until the page object is created.
 					self.body = g.page.content_get();
 				}, 0);
-			} else if (update.data == 'update') {
-				self.body   = update.html;
-				self.js_str = update.js;
+			} else {
+				self.body   = update.body;
+				self.pagetitle = update.title;
 			}
 
 			p.apply_update_generic(update);
@@ -959,6 +965,10 @@ var robjh = (function() {
 
 		self.mime = (function() {
 			return "text/html";
+		});
+
+		self.title = (function() {
+			return self.pagetitle;
 		});
 
 		self.gen_page = (function() {
@@ -1082,6 +1092,10 @@ var robjh = (function() {
 
 		self.parent_get = (function() {
 			return self.children['..'] || null;
+		});
+
+		self.title = (function() {
+			return "Index of " + node.pwd();
 		});
 
 		var path_resolve_common = (function(path, on_notfound = undefined) {
@@ -1692,7 +1706,7 @@ var robjh = (function() {
 
 		self.fix_initial_history = (function(node) {
 			self.node = node;
-			history.replaceState(node.path(), "Index of " + node.path(), node.url());
+			history.replaceState(node.path(), node.title(), node.url());
 		});
 
 		var token_generator = 0;
@@ -1750,7 +1764,7 @@ var robjh = (function() {
 			self.node = node;
 
 			if (!stayput) {
-				history.pushState(node.pwd(), "Index of " + node.pwd(), node.url());
+				history.pushState(node.pwd(), node.title(), node.url());
 				p.callback_url_update_exec(node);
 			}
 
@@ -1760,7 +1774,7 @@ var robjh = (function() {
 		self.dir_change_inplace = (function(node) {
 			self.node = node;
 			self.content_replace(p.gen_index_page(node));
-			history.replaceState(node.pwd(), "Index of " + node.pwd(), node.url());
+			history.replaceState(node.pwd(), node.title(), node.url());
 		});
 
 		self.node_change = (function(node) {
