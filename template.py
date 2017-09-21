@@ -172,7 +172,8 @@ class Html():
 			"title":title,
 			"body":body,
 			"domain":_domain,
-			"uri":_uri
+			"uri":_uri,
+			"doctype":"html"
 		}
 
 	def title(self, str):
@@ -205,6 +206,7 @@ class Html_Index(Html):
 		super().__init__()
 		self.path(path)
 		self.index(index)
+		self.subs["doctype"] = "dir"
 
 	def path(self, str):
 		self.title("index of "+str)

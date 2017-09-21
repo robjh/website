@@ -39,7 +39,7 @@
 		if (index_specified) {
 			path = path.substring(0, path.length - 9);
 		}
-		var target = fs.root.path_resolve_create(path, "dir");
+		var target = fs.root.path_resolve_create(path, "${doctype}");
 		var pwd = target.is_dir ? target : target.parent();
 		if (target.is_dir && !index_specified && target.children['default.html']) {
 			target = pwd.children['default.html'];
