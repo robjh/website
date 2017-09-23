@@ -186,12 +186,12 @@ def main():
 			with open(path.dest(path.MUTUAL, ".htaccess"), 'w') as fd:
 				fd.write("""RewriteEngine On
 
-RewriteCond %{DOCUMENT_ROOT}/$1default.html.json -f
+RewriteCond %{{DOCUMENT_ROOT}}{0}/$1default.html.json -f
 RewriteRule ^(.*/)?default_ajax_action.json$ $1default.html.json [L]
 RewriteRule ^(.*/)?default_ajax_action.json$ $1index.html.json [L]
 
 DirectoryIndex default.html index.html
-""")
+""".format(template.uri()))
 				if ".htaccess" in listing: listing.remove(".htaccess")
 
 		# remove any unexpected files in the web directory

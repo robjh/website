@@ -24,6 +24,11 @@ def load(url):
 
 _bodyless_tags = ["img","br","input"]
 
+def domain():
+	return _domain
+def uri():
+	return _uri
+
 class Html_Node():
 	def __init__(self, tag, attrs):
 		self.name = tag
@@ -221,7 +226,7 @@ class Html_Index(Html):
 		rows = []
 		for i in self.index:
 			rows.append(templates['index_table_row'].substitute({
-				"icon_url":  "/usr/share/icons/dir.png",
+				"icon_url":  "{}/usr/share/icons/dir.png".format(_uri),
 				"icon_alt":  "DIR",
 				"href":      "/{}{}/{}".format(_uri, self._path, i["name"]),
 				"data_path": "{}/{}".format(self._path, i["name"]),
