@@ -224,14 +224,46 @@ class Html_Index(Html):
 	def render(self, minify):
 		# build index rows
 		rows = []
-		for i in self.index:
+
+		if ("/" != self._path):
 			rows.append(templates['index_table_row'].substitute({
-				"icon_url":  "{}/usr/share/icons/dir.png".format(_uri),
-				"icon_alt":  "DIR",
+				"icon_url":  "{}/usr/share/icons/back.png".format(_uri),
+				"icon_alt":  "PARENTDIR",
+				"href":      "..",
+				"data_path": "..",
+				"data_type": "dir",
+				"mime":      "Directory",
+				"text":      "Parent Directory"
+			}))
+
+		for i in self.index:
+			icon_url = "unknown.png"
+			icon_alt = "???"
+
+			if ("Directory" == i["mime"]):
+				icon_url = "dir.png"
+				icon_alt = "DIR"
+
+			elif ("text/html" == i["mime"]):
+				icon_url = "layout.png"
+				icon_alt = "HTML"
+
+			elif ("file" == i["type"]):
+				icon_url = "binary.png"
+				icon_alt = "BIN"
+
+				if (i["mime"] in ["image/png", "image/jpeg"]):
+					icon_url = "image2.png"
+					icon_alt = "IMG"
+
+			rows.append(templates['index_table_row'].substitute({
+				"icon_url":  "{}/usr/share/icons/{}".format(_uri, icon_url),
+				"icon_alt":  icon_alt,
 				"href":      "/{}{}/{}".format(_uri, self._path, i["name"]),
 				"data_path": "{}/{}".format(self._path, i["name"]),
 				"data_type": i["type"],
-				"type":      i["type"],
+				"mime":      i["mime"],
+			#	"type":      i["type"],
 				"text":      i["name"]
 			}))
 		self.subs["body"] = templates["index"].substitute({

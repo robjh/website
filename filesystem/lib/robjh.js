@@ -1202,10 +1202,10 @@ var robjh = (function() {
 					if (
 						uri[uri.length-1] == '/'
 					) {
-						append = "default_ajax_action.json";
+						append = force ? "index.html.json" : "default_ajax_action.json";
 					} else if (uri.lastIndexOf('/') > uri.lastIndexOf('.')) {
-						append = "/default_ajax_action.json";
-					} else if (/.html^/.test(uri)) {
+						append = force ? "/index.html.json" : "/default_ajax_action.json";
+					} else if (/.html$/.test(uri)) {
 						append = ".json";
 					}
 

@@ -35,9 +35,9 @@
 		});
 
 		var path = window.location.pathname.substr(fs.chroot.length);
-		var index_specified = path.endsWith("index.php");
+		var index_specified = path.endsWith("index.html");
 		if (index_specified) {
-			path = path.substring(0, path.length - 9);
+			path = path.substring(0, path.length - 10);
 		}
 		var target = fs.root.path_resolve_create(path, "${doctype}");
 		var pwd = target.is_dir ? target : target.parent();
