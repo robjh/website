@@ -5,6 +5,7 @@ import os
 import json
 import css_html_js_minify
 import mimetypes
+import shutil
 from pprint import pprint
 
 import template
@@ -81,10 +82,7 @@ class Path_Reformatter:
 		raise ValueError("Unrecognised type. Must be one of SRC, MUTUAL, DEST")
 
 	def copy_file(self, mutual):
-		with open(self.src(self.MUTUAL, mutual), 'r') as fdr:
-			with open(self.dest(self.MUTUAL, mutual), 'w') as fdw:
-				fdw.write(fdr.read())
-
+		shutil.copy(self.src(self.MUTUAL, mutual), self.dest(self.MUTUAL, mutual))
 
 
 
@@ -148,6 +146,10 @@ def main():
 				with open(path.dest(path.MUTUAL, mutualpath) + ".json", 'w') as fd:
 					fd.write(json.dumps(page.as_dict(minify=args.minify)))
 				index.append({"name":file, "type":"html"})
+
+			elif ext in [".jpeg", ".jpg", ".png"]:
+				path.copy_file(mutualpath)
+
 			print("/"+mutualpath)
 
 		# create index pages

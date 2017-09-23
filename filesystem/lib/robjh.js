@@ -1496,7 +1496,7 @@ var robjh = (function() {
 			if (self.children['..']) {
 				var n = self.children['..'];
 				table.appendChild(row({
-					icon_src: '/icons/back.png',
+					icon_src: '/usr/share/icons/back.png',
 					icon_alt: '[PARENTDIR]',
 					title: 'Parent Directory',
 					url: n.url(),
@@ -1524,7 +1524,7 @@ var robjh = (function() {
 				switch (child.type()) {
 				  case fs.types.dir:
 					table.appendChild(row({
-						icon_src: '/icons/dir.png',
+						icon_src: '/usr/share/icons/dir.png',
 						icon_alt: '[DIR]',
 						title: child.name(),
 						url: child.url(),
@@ -1536,7 +1536,7 @@ var robjh = (function() {
 
 				  case fs.types.exec:
 					table.appendChild(row({
-						icon_src: '/icons/binary.png',
+						icon_src: '/usr/share/icons/binary.png',
 						icon_alt: '[JS]',
 						title: keys[i],
 						type: child.mime()
@@ -1545,7 +1545,7 @@ var robjh = (function() {
 
 				  case fs.types.html:
 					table.appendChild(row({
-						icon_src: '/icons/layout.png',
+						icon_src: '/usr/share/icons/layout.png',
 						icon_alt: '[HTML]',
 						title: keys[i],
 						url: child.url(),
@@ -1557,7 +1557,7 @@ var robjh = (function() {
 
 				  case fs.types.blob:
 					table.appendChild(row({
-						icon_src: '/icons/binary.png',
+						icon_src: '/usr/share/icons/binary.png',
 						icon_alt: '[FILE]',
 						title: keys[i],
 						url: child.url(),
@@ -1568,7 +1568,7 @@ var robjh = (function() {
 
 				  case fs.types.file:
 					table.appendChild(row({
-						icon_src: '/icons/binary.png',
+						icon_src: '/usr/share/icons/binary.png',
 						icon_alt: '[FILE]',
 						title: keys[i],
 						url: child.url(),
@@ -1580,7 +1580,7 @@ var robjh = (function() {
 
 				  default:
 					table.appendChild(row({
-						icon_src: '/icons/binary.png',
+						icon_src: '/usr/share/icons/binary.png',
 						icon_alt: '[NULL]',
 						title: keys[i],
 						type: child.mime()

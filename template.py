@@ -221,7 +221,7 @@ class Html_Index(Html):
 		rows = []
 		for i in self.index:
 			rows.append(templates['index_table_row'].substitute({
-			"icon_url":  "localhost",
+				"icon_url":  "/usr/share/icons/dir.png",
 				"icon_alt":  "DIR",
 				"href":      "/{}{}/{}".format(_uri, self._path, i["name"]),
 				"data_path": "{}/{}".format(self._path, i["name"]),
