@@ -695,7 +695,7 @@ var robjh = (function() {
 			});
 
 			node.child_set("cookies",     fs.element_exec({ constructor: cookies     }));
-			node.child_set("sudo",        fs.element_exec({ constructor: sudo        }));
+//			node.child_set("sudo",        fs.element_exec({ constructor: sudo        }));
 			node.child_set("uname",       fs.element_exec({ constructor: uname       }));
 			node.child_set("hellouser",   fs.element_exec({ constructor: hello_user  }));
 			node.child_set("page",        fs.element_exec({ constructor: rewritepage }));
