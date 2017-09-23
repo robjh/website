@@ -983,7 +983,7 @@ var robjh = (function() {
 			} else {
 				self.body   = update.body;
 				self.pagetitle = update.title;
-				p.size = update.size;
+				if (update.size) p.size = update.size;
 			}
 
 			p.apply_update_generic(update);
