@@ -424,6 +424,7 @@ var robjh = (function() {
 			node.child_set("clear",   fs.element_exec({ constructor: clear   }));
 
 			node.child_set("dir",     node.child_get('ls'));
+			node.local = true;
 /*}}}*/
 		}(self.root.path_resolve_create('/bin', 'dir')));
 
@@ -701,6 +702,7 @@ var robjh = (function() {
 //			node.child_set("ajax",        fs.element_exec({ constructor: ajax        }));
 			node.child_set("localdata",   fs.element_exec({ constructor: local_data  }));
 			node.child_set("breakpoint",  fs.element_exec({ constructor: breakpoint  }));/*}}}*/
+			node.local = true;
 		}(self.root.path_resolve_create('/usr/bin', 'dir')));
 
 		return self;
