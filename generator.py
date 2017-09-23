@@ -117,7 +117,7 @@ def main():
 			destpath = os.path.join( path.dest(path.SRC, path_src) , dir)
 			if os.path.isfile(destpath):
 				os.remove(destpath)
-			index.append({"name":dir,"type":"dir", "mime":"Directory"})
+			index.append({"name":dir,"type":"dir", "mime":"Directory", "size":0})
 
 		for file in files:
 			ext = os.path.splitext(file)[1]
@@ -128,7 +128,7 @@ def main():
 					continue
 				if config["files"][mutualpath]["action"] == "raw":
 					path.copy_file(mutualpath)
-					index.append({"name":file, "type":"file", "mime":"Directory"})
+					index.append({"name":file, "type":"file", "mime":"Directory", "size":0})
 					if file in listing: listing.remove(file)
 					continue
 
@@ -145,11 +145,21 @@ def main():
 
 				with open(path.dest(path.MUTUAL, mutualpath) + ".json", 'w') as fd:
 					fd.write(json.dumps(page.as_dict(minify=args.minify)))
-				index.append({"name":file, "type":"html", "mime":"text/html"})
+				index.append({
+					"name": file,
+					"type": "html",
+					"mime": "text/html",
+					"size": os.path.getsize(path.dest(path.MUTUAL, mutualpath))
+				})
 
 			elif ext in [".jpeg", ".jpg", ".png"]:
 				path.copy_file(mutualpath)
-				index.append({"name": file, "type":"file", "mime":mimetypes.guess_type(mutualpath)[0]})
+				index.append({
+					"name": file,
+					"type": "file",
+					"mime": mimetypes.guess_type(mutualpath)[0],
+					"size": os.path.getsize(path.dest(path.MUTUAL, mutualpath))
+				})
 
 
 

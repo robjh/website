@@ -708,6 +708,24 @@ var robjh = (function() {
 		return self;
 	});
 
+	fs.GB = 1073742000;
+	fs.MB = 1048576;
+	fs.KB = 1024;
+
+	fs.size_hr = (function(bytes) {
+		if (!bytes) return "";
+		if (bytes > fs.GB) {
+			return (bytes/fs.GB).toFixed(2) + "GB";
+		}
+		if (bytes > fs.MB) {
+			return (bytes/fs.MB).toFixed(2) + "MB";
+		}
+		if (bytes > 1000) {
+			return (bytes/fs.KB).toFixed(2) + "KB";
+		}
+		return bytes + "B";
+	});
+
 	fs.types = {
 		'dir':  1,
 		'exec': 2,
@@ -737,6 +755,10 @@ var robjh = (function() {
 		});
 		self.title = (function() {
 			return self.path();
+		});
+		self.size = (function() {
+			if (p.size !== undefined)
+				return p.size
 		});
 		self.linkable = false;
 		self.url = (function() {
@@ -948,6 +970,7 @@ var robjh = (function() {
 		self.linkable = true;
 		self.body;
 		p.js_str = "(void)0;";
+		p.size = argv.size;
 
 		self.apply_update_recursive = (function(update) {
 			if (update.type != 'html') return;
@@ -960,6 +983,7 @@ var robjh = (function() {
 			} else {
 				self.body   = update.body;
 				self.pagetitle = update.title;
+				p.size = update.size;
 			}
 
 			p.apply_update_generic(update);
@@ -983,6 +1007,7 @@ var robjh = (function() {
 		argv = argv || {};
 		p = p || {};
 		p.type = fs.types.blob;
+		p.size = argv.size || 0;
 
 		var self = element_generic(argv, p);
 		self.is_blob = true;
@@ -1003,6 +1028,7 @@ var robjh = (function() {
 		p = p || {};
 		p.type = fs.types.file;
 		p.mime = argv.mime || "UNKNOWN";
+		p.size = argv.size || 0;
 
 		p.mime_viewable = [
 			"text/plain",
@@ -1026,6 +1052,7 @@ var robjh = (function() {
 			if (update.type != 'file') return;
 
 			p.mime = update.mime;
+			p.size = update.size;
 			p.apply_update_generic(update);
 
 			if (ao.array_contains(p.mime_viewable, update.mime)) {
@@ -1127,7 +1154,7 @@ var robjh = (function() {
 		self.path_resolve = (function(path) {
 			return path_resolve_common(path);
 		});
-		self.path_resolve_create = (function(path, type, mime) {
+		self.path_resolve_create = (function(path, type, mime, size) {
 			return path_resolve_common(path, function(node, path_arr, i) {
 				if (i + 1 < path_arr.length) {
 					return node.mkdir(path_arr[i]);
@@ -1139,6 +1166,7 @@ var robjh = (function() {
 						return self.children[path_arr[i]] = fs.element_html({
 							parent: self,
 							name: path_arr[i],
+							size: size,
 							fs: self.fs
 						});
 					  case "file":
@@ -1147,6 +1175,7 @@ var robjh = (function() {
 							name: path_arr[i],
 							realpath: path,
 							mime: mime,
+							size: size,
 							fs: self.fs
 						});
 					  default:
@@ -1270,6 +1299,7 @@ var robjh = (function() {
 								parent: self,
 								name: sm.path[0],
 								mime: sm.xhr.getResponseHeader("Content-Type"),
+								size: sm.xhr.response.length,
 								realpath: "",
 								fs: self.fs
 							});
@@ -1493,6 +1523,9 @@ var robjh = (function() {
 					ao.dom_node('td', {
 						text: a.type || 'unknown'
 					}),
+					ao.dom_node('td', {
+						text: fs.size_hr(a.size)
+					}),
 				] });
 			});
 
@@ -1556,7 +1589,8 @@ var robjh = (function() {
 						url: child.url(),
 						onclick: child.event_click,
 						path: null,
-						type: child.mime()
+						type: child.mime(),
+						size: child.size()
 					}));
 					break;
 
@@ -1567,7 +1601,8 @@ var robjh = (function() {
 						title: keys[i],
 						url: child.url(),
 						path: null,
-						type: child.mime()
+						type: child.mime(),
+						size: child.size()
 					}));
 					break;
 
@@ -1592,7 +1627,8 @@ var robjh = (function() {
 						url: child.url(),
 						onclick: child.event_click,
 						path: null,
-						type: child.mime()
+						type: child.mime(),
+						size: child.size()
 					}));
 					break;
 

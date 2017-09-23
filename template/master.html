@@ -15,7 +15,7 @@
 		<div id="header_hr"><hr></div>
 	</div>
 	<div id="site_container">
-		${body}
+${body}
 	</div>
 
 </div>
@@ -59,9 +59,10 @@
 			var path = a_arr[i].getAttribute('data-path');
 			var type = a_arr[i].getAttribute('data-type');
 			var mime = a_arr[i].getAttribute('data-mime');
+			var size = a_arr[i].getAttribute('data-size');
 
 			if (path) {
-				var node = pwd.path_resolve_create(path, type, mime);
+				var node = pwd.path_resolve_create(path, type, mime, size);
 			}
 		}
 

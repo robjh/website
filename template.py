@@ -9,6 +9,10 @@ templates = {}
 _domain = None
 _uri    = None
 
+_1KB = 1024
+_1MB = 1048576
+_1GB = 1073742000
+
 def load(url):
 	global _domain, _uri
 	with open("./template/master.html") as fd:
@@ -203,7 +207,7 @@ class Html():
 		return {
 			"type":  "html",
 			"title": self.subs["title"],
-			"body":  html_minity(self.subs["body"]) if minify else str(self.subs["body"])
+			"body":  html_minify(self.subs["body"]) if minify else str(self.subs["body"])
 		}
 
 class Html_Index(Html):
@@ -245,7 +249,9 @@ class Html_Index(Html):
 				"data_path": "..",
 				"data_type": "dir",
 				"mime":      "Directory",
-				"text":      "Parent Directory"
+				"text":      "Parent Directory",
+				"size":      str(0),
+				"size_hr":   ""
 			}))
 			path = self._path
 
@@ -269,6 +275,16 @@ class Html_Index(Html):
 					icon_url = "image2.png"
 					icon_alt = "IMG"
 
+			size_hr = ""
+			if (i["size"] > _1GB):
+				size_hr = "{:.2f}GB".format(i["size"]/_1GB)
+			elif (i["size"] > _1MB):
+				size_hr = "{:.2f}MB".format(i["size"]/_1MB)
+			elif (i["size"] > 1000):
+				size_hr = "{:.2f}KB".format(i["size"]/_1KB)
+			elif (i["size"]):
+				size_hr = "{}B".format(i["size"])
+
 			rows.append(templates['index_table_row'].substitute({
 				"icon_url":  "{}/usr/share/icons/{}".format(_uri, icon_url),
 				"icon_alt":  icon_alt,
@@ -276,7 +292,9 @@ class Html_Index(Html):
 				"data_path": "{}/{}".format(path, i["name"]),
 				"data_type": i["type"],
 				"mime":      i["mime"],
-				"text":      i["name"]
+				"text":      i["name"],
+				"size":      str(i["size"]),
+				"size_hr":   size_hr
 			}))
 		self.subs["body"] = templates["index"].substitute({
 			"index_table_row": str.join("",rows),
