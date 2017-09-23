@@ -1012,6 +1012,9 @@ var robjh = (function() {
 		];
 
 		var self = element_generic(argv, p);
+		if (ao.array_contains(p.mime_viewable, p.mime)) {
+			self.local = true;
+		}
 
 		self.linkable = true;
 		self.is_file  = true;
@@ -1124,17 +1127,15 @@ var robjh = (function() {
 		self.path_resolve = (function(path) {
 			return path_resolve_common(path);
 		});
-		self.path_resolve_create = (function(path, type) {
+		self.path_resolve_create = (function(path, type, mime) {
 			return path_resolve_common(path, function(node, path_arr, i) {
 				if (i + 1 < path_arr.length) {
 					return node.mkdir(path_arr[i]);
 				} else {
 					switch (type) {
 					  case "dir":
-					  case "directory":
 						return node.mkdir(path_arr[i])
 					  case "html":
-					  case "text/html":
 						return self.children[path_arr[i]] = fs.element_html({
 							parent: self,
 							name: path_arr[i],
@@ -1144,6 +1145,8 @@ var robjh = (function() {
 						return self.children[path_arr[i]] = fs.element_file({
 							parent: self,
 							name: path_arr[i],
+							realpath: path,
+							mime: mime,
 							fs: self.fs
 						});
 					  default:
@@ -1569,9 +1572,22 @@ var robjh = (function() {
 					break;
 
 				  case fs.types.file:
+					var icon_src, icon_alt;
+
+					switch (child.mime()) {
+					  case "image/png":
+					  case "image/jpeg":
+						icon_src = '/usr/share/icons/image2.png';
+						icon_alt = '[IMG]';
+						break;
+					  default:
+						icon_src = '/usr/share/icons/binary.png';
+						icon_alt = '[FILE]';
+						break;
+					}
 					table.appendChild(row({
-						icon_src: '/usr/share/icons/binary.png',
-						icon_alt: '[FILE]',
+						icon_src: icon_src,
+						icon_alt: icon_alt,
 						title: keys[i],
 						url: child.url(),
 						onclick: child.event_click,

@@ -219,11 +219,23 @@ class Html_Index(Html):
 
 	def index(self, index):
 		self.index = index
-#		self.body(json.dumps(index))
+
+	def breadcrumb(self):
+		dirs = self._path.split('/')
+		ret = ""
+		path = ""
+		for dir in dirs:
+			path += dir + "/"
+			ret += "<a href=\"{chroot}{path}\" data-path=\"{path}\" data-type=\"dir\">{text}/</a>".format(
+				chroot=_uri, path=path, text=dir
+			)
+		return ret;
 
 	def render(self, minify):
 		# build index rows
 		rows = []
+
+		path = ""
 
 		if ("/" != self._path):
 			rows.append(templates['index_table_row'].substitute({
@@ -235,6 +247,7 @@ class Html_Index(Html):
 				"mime":      "Directory",
 				"text":      "Parent Directory"
 			}))
+			path = self._path
 
 		for i in self.index:
 			icon_url = "unknown.png"
@@ -250,7 +263,7 @@ class Html_Index(Html):
 
 			elif ("file" == i["type"]):
 				icon_url = "binary.png"
-				icon_alt = "BIN"
+				icon_alt = "FILE"
 
 				if (i["mime"] in ["image/png", "image/jpeg"]):
 					icon_url = "image2.png"
@@ -259,15 +272,15 @@ class Html_Index(Html):
 			rows.append(templates['index_table_row'].substitute({
 				"icon_url":  "{}/usr/share/icons/{}".format(_uri, icon_url),
 				"icon_alt":  icon_alt,
-				"href":      "/{}{}/{}".format(_uri, self._path, i["name"]),
-				"data_path": "{}/{}".format(self._path, i["name"]),
+				"href":      "/{}{}/{}".format(_uri, path, i["name"]),
+				"data_path": "{}/{}".format(path, i["name"]),
 				"data_type": i["type"],
 				"mime":      i["mime"],
-			#	"type":      i["type"],
 				"text":      i["name"]
 			}))
 		self.subs["body"] = templates["index"].substitute({
-			"index_table_row": str.join("",rows)
+			"index_table_row": str.join("",rows),
+			"breadcrumb":      self.breadcrumb()
 		})
 		return Html.render(self, minify)
 

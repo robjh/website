@@ -151,9 +151,10 @@ def main():
 				path.copy_file(mutualpath)
 				index.append({"name": file, "type":"file", "mime":mimetypes.guess_type(mutualpath)[0]})
 
-			print("/"+mutualpath)
+
 
 		# create index pages
+		index = sorted(index, key=lambda row: (row["type"] != "dir", row["name"]))
 		with open(os.path.join(path.dest(path.SRC, path_src), "index.html"), 'w') as fd:
 			fd.write( template.Html_Index(path.absolute(path.SRC, path_src), index).render(minify=args.minify) )
 			if "index.html" in listing: listing.remove("index.html")
@@ -166,6 +167,7 @@ def main():
 				"children":json_index
 			}))
 			if "index.html.json" in listing: listing.remove("index.html.json")
+
 
 		if args.redirect == "symlink":
 			# create default_ajax_action.json symlink

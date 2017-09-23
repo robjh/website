@@ -51,6 +51,20 @@
 			fs:         fs
 		});
 
+		/* expand the filesystem model */
+		var a_arr = Array.prototype.slice.call(
+			document.getElementById('site_container').getElementsByTagName('a')
+		);
+		for (var i = 0, l = a_arr.length ; i < l ; ++i) {
+			var path = a_arr[i].getAttribute('data-path');
+			var type = a_arr[i].getAttribute('data-type');
+			var mime = a_arr[i].getAttribute('data-mime');
+
+			if (path) {
+				var node = pwd.path_resolve_create(path, type, mime);
+			}
+		}
+
 		if (window.location.hash && window.location.hash.startsWith('#./')) {
 			var hash_node = pwd.path_resolve(window.location.hash.substr(1));
 			if (hash_node) {
@@ -62,16 +76,13 @@
 			page.node_change_inplace(target);
 		} else {
 
-			/* expand the filesystem model, and setup onclick events for links. */
-			var a_arr = Array.prototype.slice.call(
-				document.getElementById('site_container').getElementsByTagName('a')
-			);
+			/* and setup onclick events for links. */
 			for (var i = 0, l = a_arr.length ; i < l ; ++i) {
 				var path = a_arr[i].getAttribute('data-path');
 				var type = a_arr[i].getAttribute('data-type');
 
 				if (path) {
-					var node = pwd.path_resolve_create(path, type);
+					var node = pwd.path_resolve(path);
 
 					if (node.type() == robjh.fs.types[type]) {
 						a_arr[i].addEventListener('click', node.event_click);
