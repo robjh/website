@@ -128,7 +128,12 @@ def main():
 					continue
 				if config["files"][mutualpath]["action"] == "raw":
 					path.copy_file(mutualpath)
-					index.append({"name":file, "type":"file", "mime":"Directory", "size":0})
+					index.append({
+						"name": file,
+						"type": "file",
+						"mime": "Directory",
+						"size": os.path.getsize(path.dest(path.MUTUAL, mutualpath))
+					})
 					if file in listing: listing.remove(file)
 					continue
 

@@ -228,9 +228,11 @@ class Html_Index(Html):
 		dirs = self._path.split('/')
 		ret = ""
 		path = ""
+		if (self._path == "/"):
+			del dirs[1]
 		for dir in dirs:
 			path += dir + "/"
-			ret += "<a href=\"{chroot}{path}\" data-path=\"{path}\" data-type=\"dir\">{text}/</a>".format(
+			ret += "<a href=\"{chroot}/{path}\" data-path=\"{path}\" data-type=\"dir\">{text}/</a>".format(
 				chroot=_uri, path=path, text=dir
 			)
 		return ret;
