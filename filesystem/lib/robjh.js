@@ -1514,7 +1514,7 @@ var robjh = (function() {
 
 				return ao.dom_node('tr', { appendChild: [
 					ao.dom_node('td', { appendChild: ao.dom_node('img', {
-						src: a.icon_src,
+						src: self.fs.chroot + a.icon_src,
 						alt: a.icon_alt,
 					})}),
 					ao.dom_node('td', {
