@@ -289,7 +289,7 @@ var robjh = (function() {
 								self.ostream.nl
 							]);
 						} else {
-							self.ostream(working_node.gen_page());
+							self.ostream(working_node.gen_page().body);
 						}
 
 						return p.exit();
@@ -970,6 +970,7 @@ var robjh = (function() {
 		self.linkable = true;
 		self.body;
 		p.js_str = "(void)0;";
+		p.css = "";
 		p.size = argv.size;
 
 		self.apply_update_recursive = (function(update) {
@@ -983,6 +984,7 @@ var robjh = (function() {
 			} else {
 				self.body   = update.body;
 				self.pagetitle = update.title;
+				if (update.css) p.css = update.css;
 				if (update.size) p.size = update.size;
 			}
 
@@ -998,7 +1000,10 @@ var robjh = (function() {
 		});
 
 		self.gen_page = (function() {
-			return self.body;
+			return {
+				body: self.body,
+				css:  p.css
+			};
 		});
 
 		return self;
@@ -1109,7 +1114,9 @@ var robjh = (function() {
 				// the file will have to be downloaded at some point
 				break;
 			}
-			return frag;
+			return {
+				body: frag
+			};
 		});
 
 		return self;
@@ -1667,7 +1674,9 @@ var robjh = (function() {
 
 			frag.appendChild(table)
 
-			return frag;
+			return {
+				body: frag
+			};
 		});
 
 		return self;
@@ -1776,6 +1785,23 @@ var robjh = (function() {
 		p.callbacks_url_change = p.callbacks_url_change || {};
 		p.current_layout = 'index'; // its probably an index page
 
+		p.style = (function() {
+			var style = document.getElementsByTagName("style");
+			console.log(style);
+			if (style.length) return style[0];
+			style = ao.dom_node("style");
+			console.log(style);
+
+			var append_to = document.getElementsByTagName("ul");
+			if (append_to.length) {
+				append_to = append_to[0];
+			} else {
+				append_to = document.getElementsByTagName("html")[0];
+			}
+			append_to.appendChild(style);
+			return style;
+		})();
+
 		self.set_this_global = (function() {
 			g.page = self;
 		});
@@ -1811,7 +1837,7 @@ var robjh = (function() {
 			self.node = argv.fs.root.path_resolve(event.state);
 			var content = self.node.gen_page();
 
-			self.content_replace(content);
+			self.content_replace(content.body);
 			p.callback_url_update_exec(self.node);
 		});
 		if (argv.global) {
@@ -1850,6 +1876,7 @@ var robjh = (function() {
 		self.dir_change_inplace = (function(node) {
 			self.node = node;
 			self.content_replace(p.gen_index_page(node));
+			p.style.innerHTML = "";
 			history.replaceState(node.pwd(), node.title(), node.url());
 		});
 
@@ -1857,25 +1884,28 @@ var robjh = (function() {
 
 			self.node = node;
 			var content = node.gen_page();
-			content = self.node.gen_page();
 
 			document.title = node.title();
 			history.pushState(node.path(), node.title(), node.url());
-			self.content_replace(content);
+			self.content_replace(content.body);
+			p.style.innerHTML = content.css || "";
 			p.callback_url_update_exec(node);
 		});
 
 		self.node_change_inplace = (function(node) {
 			self.node = node;
 			var content = node.gen_page();
-			self.content_replace(content);
+			self.content_replace(content.body);
+			p.style.innerHTML = content.css || "";
 			document.title = node.title();
 			history.replaceState(node.path(), node.title(), node.url());
 		});
 
 		self.reload = (function() {
 			if (p.current_layout = 'index') {
-				self.content_replace(self.node.gen_page());
+				page = self.node.gen_page()
+				self.content_replace(page.body);
+				p.style.innerHTML = page.css || "";
 			}
 		});
 

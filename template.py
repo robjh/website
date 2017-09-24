@@ -71,6 +71,13 @@ class Html_Parser(HTMLParser):
 	def clean(self):
 		self.contents = None
 		self.title = ""
+		self.css = ""
+
+	def data_passback(self, tag, data):
+		if tag == "title":
+			self.title = data
+		if tag == "style":
+			self.css = data
 
 	class State_Base():
 		def __init__(self, parent):
@@ -118,8 +125,8 @@ class Html_Parser(HTMLParser):
 		def __init__(self, parent):
 			super().__init__(parent)
 		def start(self, tag, attr):
-			if tag == "title":
-				self.parent.state_stack.append(Html_Parser.State_Head_Title(self.parent))
+			if tag in ["title", "style"]:
+				self.parent.state_stack.append(Html_Parser.State_Tag_GetData(self.parent, tag))
 				return
 		def end(self, tag):
 			if tag == "head":
@@ -127,20 +134,21 @@ class Html_Parser(HTMLParser):
 				return
 		def data(self, data):
 			0 # ignore
-	class State_Head_Title(State_Base):
-		def __init__(self, parent):
+	class State_Tag_GetData(State_Base):
+		def __init__(self, parent, tag):
 			super().__init__(parent)
-			self.title = ""
+			self.tag = tag
+			self.extracted = ""
 		def start(self, tag, attr):
 			super().start(tag, attrs)
 		def end(self, tag):
-			if tag == "title":
+			if tag == self.tag:
 				self.parent.state_stack.pop()
-				self.parent.title = self.title.strip()
+				self.parent.data_passback(self.tag, self.extracted.strip())
 				return
 			super().end(tag)
 		def data(self, data):
-			self.title += data
+			self.extracted += data
 
 	class State_Body(State_Base):
 		def __init__(self, parent):
@@ -182,7 +190,8 @@ class Html():
 			"body":body,
 			"domain":_domain,
 			"uri":_uri,
-			"doctype":"html"
+			"doctype":"html",
+			"css":""
 		}
 
 	def title(self, str):
@@ -196,6 +205,9 @@ class Html():
 		parser.feed(str)
 		self.subs["body"] = parser.contents
 		self.subs["title"] = parser.title
+		self.subs["css"] = parser.css
+		if parser.css:
+			self.subs["css_header"] = "<style>{}</style>".format(parser.css)
 
 	def render(self, minify):
 		doc = templates['master'].substitute(self.subs)
@@ -204,11 +216,14 @@ class Html():
 		return doc
 
 	def as_dict(self, minify):
-		return {
+		ret = {
 			"type":  "html",
 			"title": self.subs["title"],
 			"body":  html_minify(self.subs["body"]) if minify else str(self.subs["body"])
 		}
+		if self.subs["css"] != "":
+			ret["css"] = self.subs["css"]
+		return ret
 
 class Html_Index(Html):
 	def __init__(self, path, index):
