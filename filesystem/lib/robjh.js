@@ -730,7 +730,6 @@ var robjh = (function() {
 		'dir':  1,
 		'exec': 2,
 		'html': 3,
-		'blob': 4,
 		'file': 5
 	};
 	var element_generic = (function(argv, p) {
@@ -1008,26 +1007,6 @@ var robjh = (function() {
 
 		return self;
 	});
-	fs.element_blob = (function(argv, p) {
-		argv = argv || {};
-		p = p || {};
-		p.type = fs.types.blob;
-		p.size = argv.size || 0;
-
-		var self = element_generic(argv, p);
-		self.is_blob = true;
-		self.local = true;
-
-		self.url = (function() {
-			return argv.url;
-		});
-
-		self.mime = (function() {
-			return argv.mime;
-		});
-
-		return self;
-	});
 	fs.element_file = (function(argv, p) {
 		argv = argv || {};
 		p = p || {};
@@ -1194,15 +1173,6 @@ var robjh = (function() {
 							parent: self,
 							name: path_arr[i],
 							realpath: self.fs.chroot + path,
-							mime: mime,
-							size: size,
-							fs: self.fs
-						});
-					  case "blob":
-						return self.children[path_arr[i]] = fs.element_blob({
-							parent: self,
-							name: path_arr[i],
-							realpath: path,
 							mime: mime,
 							size: size,
 							fs: self.fs
@@ -1617,18 +1587,6 @@ var robjh = (function() {
 						title: keys[i],
 						url: child.url(),
 						onclick: child.event_click,
-						path: null,
-						type: child.mime(),
-						size: child.size()
-					}));
-					break;
-
-				  case fs.types.blob:
-					table.appendChild(row({
-						icon_src: '/usr/share/icons/binary.png',
-						icon_alt: '[FILE]',
-						title: keys[i],
-						url: child.url(),
 						path: null,
 						type: child.mime(),
 						size: child.size()
