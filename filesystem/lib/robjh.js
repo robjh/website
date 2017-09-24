@@ -1064,6 +1064,19 @@ var robjh = (function() {
 			return p.mime;
 		});
 
+		var parent_event_click = self.event_click;
+		self.event_click = (function(e) {
+
+			if (ao.array_contains(p.mime_viewable, p.mime)) {
+				return parent_event_click(e);
+			} else {
+				e.preventDefault();
+				e.stopPropagation();
+				window.location = self.realpath();
+			}
+			return false;
+		});
+
 		self.gen_page = (function() {
 			var frag = document.createDocumentFragment();
 
@@ -1171,6 +1184,15 @@ var robjh = (function() {
 						});
 					  case "file":
 						return self.children[path_arr[i]] = fs.element_file({
+							parent: self,
+							name: path_arr[i],
+							realpath: self.fs.chroot + path,
+							mime: mime,
+							size: size,
+							fs: self.fs
+						});
+					  case "blob":
+						return self.children[path_arr[i]] = fs.element_blob({
 							parent: self,
 							name: path_arr[i],
 							realpath: path,

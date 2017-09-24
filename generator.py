@@ -131,7 +131,7 @@ def main():
 					index.append({
 						"name": file,
 						"type": "file",
-						"mime": "Directory",
+						"mime": mimetypes.guess_type(mutualpath)[0],
 						"size": os.path.getsize(path.dest(path.MUTUAL, mutualpath))
 					})
 					if file in listing: listing.remove(file)
