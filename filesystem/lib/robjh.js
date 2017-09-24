@@ -1838,6 +1838,7 @@ var robjh = (function() {
 			var content = self.node.gen_page();
 
 			self.content_replace(content.body);
+			p.style.innerHTML = content.css || "";
 			p.callback_url_update_exec(self.node);
 		});
 		if (argv.global) {
@@ -1871,6 +1872,7 @@ var robjh = (function() {
 			}
 
 			self.content_replace(p.gen_index_page(node));
+			p.style.innerHTML = "";
 		});
 
 		self.dir_change_inplace = (function(node) {
