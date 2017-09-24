@@ -708,9 +708,9 @@ var robjh = (function() {
 		return self;
 	});
 
-	fs.GB = 1073742000;
-	fs.MB = 1048576;
-	fs.KB = 1024;
+	fs.GB = 0x40000000;
+	fs.MB = 0x100000;
+	fs.KB = 0x400;
 
 	fs.size_hr = (function(bytes) {
 		if (!bytes) return "";

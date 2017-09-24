@@ -9,9 +9,9 @@ templates = {}
 _domain = None
 _uri    = None
 
-_1KB = 1024
-_1MB = 1048576
-_1GB = 1073742000
+_1KB = 0x400
+_1MB = 0x100000
+_1GB = 0x40000000
 
 def load(url):
 	global _domain, _uri
