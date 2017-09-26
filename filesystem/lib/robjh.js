@@ -1126,7 +1126,7 @@ var robjh = (function() {
 		});
 
 		self.title = (function() {
-			return "Index of " + node.pwd();
+			return "Index of " + node.path();
 		});
 
 		var path_resolve_common = (function(path, on_notfound = undefined) {
@@ -1428,7 +1428,7 @@ var robjh = (function() {
 		});
 
 		self.title = (function() {
-			return "Index of " + argv.name;
+			return "Index of " + self.path();
 		});
 
 		self.child_exists = (function(name) {

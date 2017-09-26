@@ -233,7 +233,7 @@ class Html_Index(Html):
 		self.subs["doctype"] = "dir"
 
 	def path(self, str):
-		self.title("index of "+str)
+		self.title("Index of "+str)
 		self._path = str
 
 	def index(self, index):
