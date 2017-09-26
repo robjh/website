@@ -1126,7 +1126,7 @@ var robjh = (function() {
 		});
 
 		self.title = (function() {
-			return "Index of " + node.pwd();
+			return "Index of " + node.path();
 		});
 
 		var path_resolve_common = (function(path, on_notfound = undefined) {
@@ -1428,7 +1428,7 @@ var robjh = (function() {
 		});
 
 		self.title = (function() {
-			return "Index of " + argv.name;
+			return "Index of " + self.path();
 		});
 
 		self.child_exists = (function(name) {
@@ -1795,6 +1795,7 @@ var robjh = (function() {
 			self.node = argv.fs.root.path_resolve(event.state);
 			var content = self.node.gen_page();
 
+			document.title = self.node.title();
 			self.content_replace(content.body);
 			p.style.innerHTML = content.css || "";
 			p.callback_url_update_exec(self.node);
