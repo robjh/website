@@ -1795,6 +1795,7 @@ var robjh = (function() {
 			self.node = argv.fs.root.path_resolve(event.state);
 			var content = self.node.gen_page();
 
+			document.title = self.node.title();
 			self.content_replace(content.body);
 			p.style.innerHTML = content.css || "";
 			p.callback_url_update_exec(self.node);
