@@ -880,7 +880,7 @@ var robjh = (function() {
 						sm.success = true;
 						break;
 					  default:
-						console.error("Received an unknown status from the server. ", xm.xhr);
+						console.error("Received an unknown status from the server. ", sm.xhr);
 						sm.node = null;
 						break;
 					}
