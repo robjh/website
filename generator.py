@@ -157,7 +157,7 @@ def main():
 					"size": os.path.getsize(path.dest(path.MUTUAL, mutualpath))
 				})
 
-			elif ext in [".jpeg", ".jpg", ".png"]:
+			elif ext in [".jpeg", ".jpg", ".png", ".svg"]:
 				path.copy_file(mutualpath)
 				index.append({
 					"name": file,
