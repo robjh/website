@@ -247,7 +247,7 @@ class Html_Index(Html):
 			del dirs[1]
 		for dir in dirs:
 			path += dir + "/"
-			ret += "<a href=\"{chroot}/{path}\" data-path=\"{path}\" data-type=\"dir\">{text}/</a>".format(
+			ret += "<a href=\"{chroot}{path}\" data-path=\"{path}\" data-type=\"dir\">{text}/</a>".format(
 				chroot=_uri, path=path, text=dir
 			)
 		return ret;
@@ -305,7 +305,7 @@ class Html_Index(Html):
 			rows.append(templates['index_table_row'].substitute({
 				"icon_url":  "{}/usr/share/icons/{}".format(_uri, icon_url),
 				"icon_alt":  icon_alt,
-				"href":      "/{}{}/{}".format(_uri, path, i["name"]),
+				"href":      "{}{}/{}".format(_uri, path, i["name"]),
 				"data_path": "{}/{}".format(path, i["name"]),
 				"data_type": i["type"],
 				"mime":      i["mime"],
