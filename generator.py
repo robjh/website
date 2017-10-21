@@ -141,7 +141,7 @@ def main():
 
 			if ext == ".html":
 				if file+".json" in listing: listing.remove(file+".json")
-				page = template.Html()
+				page = template.Html( pwd=path.absolute(path.SRC, path_src) )
 				with open(path.src(path.MUTUAL, mutualpath), 'r') as fd:
 					page.parse(fd.read())
 

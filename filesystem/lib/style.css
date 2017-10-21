@@ -73,3 +73,12 @@ ul.lscmd li {
 .hidden {
 	display: none;
 }
+figure {
+	padding: 0;
+	margin: 0;
+}
+@media (max-width: 500px) {
+	.hide_mobile{
+		display: none;
+	}
+}

@@ -11,7 +11,14 @@
 <div id="master">
 	<div id="site_header">
 		<div id="terminal">
-			guest@${domain}
+
+
+			<figure aria-labelledby="header_cowsay_caption" class="hide_mobile">
+				<div class="cowsay_box" >This is what happens when you prioritise showing off over SEO.</div>
+				<pre>        \   ^__^<br>         \  (oo)________<br>            (__)        )\/\<br>                ||----w |<br>                ||     ||</pre>
+				<figcaption class="hidden" id="header_cowsay_caption">This is what happens when you prioritise showing off over SEO.</figcaption>
+			</figure>
+			<span id="prerendered_prompt">[guest@${domain}:${pwd}]</span>
 		</div>
 		<div id="header_hr"><hr></div>
 	</div>
@@ -97,17 +104,17 @@ ${body}
 		}
 		page.fix_initial_history(target);
 
+		document.getElementById("prerendered_prompt").outerHTML=''
 		var term = ao.terminal({
 			container:  document.getElementById("terminal"),
 			auto_focus: true,
-			append:     false,
+			append:     true,
 			process: robjh.shell,
 			process_init_argv: {
 				fs:         fs,
 				pwd:        pwd,
 				hostname:   '${domain}',
 				username:   'guest',
-				args:       'echo "This is what happens when you prioritise showing off over SEO." | cowsay;',
 			}
 		});
 

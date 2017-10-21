@@ -184,7 +184,7 @@ class Html_Parser(HTMLParser):
 
 class Html():
 	subs = {}
-	def __init__(self, title=None, body=None):
+	def __init__(self, pwd="/", title=None, body=None):
 		self.subs = {
 			"title":title,
 			"body":body,
@@ -193,6 +193,7 @@ class Html():
 			"doctype":"html",
 			"css":""
 		}
+		self.path(pwd)
 
 	def title(self, str):
 		self.subs["title"] = str
@@ -225,16 +226,24 @@ class Html():
 			ret["css"] = self.subs["css"]
 		return ret
 
+	def path(self, str):
+		self._path = str
+		if (str == "/"):
+			self.subs["pwd"] = "/"
+		else:
+			self.subs["pwd"] = str + "/"
+
 class Html_Index(Html):
 	def __init__(self, path, index):
 		super().__init__()
 		self.path(path)
 		self.index(index)
 		self.subs["doctype"] = "dir"
+		self.path(path)
 
 	def path(self, str):
+		super().path(str)
 		self.title("Index of "+str)
-		self._path = str
 
 	def index(self, index):
 		self.index = index
