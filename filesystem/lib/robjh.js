@@ -67,7 +67,6 @@ var robjh = (function() {
 			if (!g.sessionStorage_works) return false;
 			var node_data = JSON.stringify(self.root.serialise());
 			window.sessionStorage.setItem('fs', node_data);
-			console.log(node_data);
 			return true;
 		});
 
@@ -874,7 +873,6 @@ var robjh = (function() {
 
 					  case 200: // Ok.
 						var index = JSON.parse(sm.xhr.responseText);
-						console.log(index);
 						self.apply_update_recursive(index);
 						self.fs.save();
 						sm.success = true;
@@ -1220,7 +1218,6 @@ var robjh = (function() {
 								sm.node = sm.node.children[sm.path[0]];
 							} else {
 								// goto ajaxy part
-								console.log(sm.path);
 								sm.handler = "ajax_create";
 								return sm.continue("ajax_request");
 							}
@@ -1281,7 +1278,6 @@ var robjh = (function() {
 					  case 200: // Ok.
 						try {
 							var update = JSON.parse(sm.xhr.responseText);
-							console.log(update);
 							sm.node.apply_update_recursive(update);
 						} catch (e) {
 							console.error(
@@ -1766,10 +1762,8 @@ var robjh = (function() {
 
 		p.style = (function() {
 			var style = document.getElementsByTagName("style");
-			console.log(style);
 			if (style.length) return style[0];
 			style = ao.dom_node("style");
-			console.log(style);
 
 			var append_to = document.getElementsByTagName("ul");
 			if (append_to.length) {
