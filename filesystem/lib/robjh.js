@@ -975,17 +975,10 @@ var robjh = (function() {
 		self.apply_update_recursive = (function(update) {
 			if (update.type != 'html') return;
 
-			if (update.data == 'dom') {
-				window.setTimeout(function() {
-					// need to delay until the page object is created.
-					self.body = g.page.content_get();
-				}, 0);
-			} else {
-				self.body   = update.body;
-				self.pagetitle = update.title;
-				if (update.css) p.css = update.css;
-				if (update.size) p.size = update.size;
-			}
+			self.body   = update.body;
+			self.pagetitle = update.title;
+			if (update.css) p.css = update.css;
+			if (update.size) p.size = update.size;
 
 			p.apply_update_generic(update);
 		});
@@ -999,8 +992,36 @@ var robjh = (function() {
 		});
 
 		self.gen_page = (function() {
+			var container = ao.dom_node("div", { "innerHTML": self.body });
+			var a_arr = Array.prototype.slice.call(
+				container.getElementsByTagName('a')
+			);
+			// make the links work with the filesystem, and create new nodes where appropreate
+			for (var i = 0, l = a_arr.length ; i < l ; ++i) {
+				var path = a_arr[i].getAttribute('data-path');
+				var type = a_arr[i].getAttribute('data-type');
+				var mime = a_arr[i].getAttribute('data-mime');
+				var size = a_arr[i].getAttribute('data-size');
+
+				if (path) {
+					var node = self.parent().path_resolve_create(path, type, mime, size);
+
+					if (node.type() == robjh.fs.types[type]) {
+						a_arr[i].addEventListener('click', node.event_click);
+						a_arr[i].href = node.url();
+					} else {
+						console.error("unknown type ("+type+") for path ("+path+") in pre-rendered content.");
+					}
+				}
+			}
+
+			// convert the container into a fragment
+			var fragment = document.createDocumentFragment();
+			while (container.firstChild) {
+				fragment.appendChild(container.firstChild);
+			}
 			return {
-				body: self.body,
+				body: fragment,
 				css:  p.css
 			};
 		});
