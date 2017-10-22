@@ -1162,15 +1162,15 @@ var robjh = (function() {
 					  case "dir":
 						return node.mkdir(path_arr[i])
 					  case "html":
-						return self.children[path_arr[i]] = fs.element_html({
-							parent: self,
+						return node.children[path_arr[i]] = fs.element_html({
+							parent: node,
 							name: path_arr[i],
 							size: size,
 							fs: self.fs
 						});
 					  case "file":
-						return self.children[path_arr[i]] = fs.element_file({
-							parent: self,
+						return node.children[path_arr[i]] = fs.element_file({
+							parent: node,
 							name: path_arr[i],
 							realpath: self.fs.chroot + path,
 							mime: mime,

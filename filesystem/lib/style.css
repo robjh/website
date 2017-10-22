@@ -59,6 +59,13 @@ ul.lscmd li {
 	margin-right: 1em;
 	min-width: 5em;
 }
+h1,h2,h3,h4,h5,h6 {
+	margin-bottom: 0;
+}
+p {
+	margin-top: 0;
+	margin-bottom: 1em;
+}
 
 .scaling_image input[type=checkbox] + label img {
 	max-width: 100%;

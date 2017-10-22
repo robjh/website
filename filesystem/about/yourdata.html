@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Your Data</title>
+	</head>
+	<body>
+		<h1>Your data</h1>
+		<h2>On my server</h2>
+		<p>
+			I dont keep your data on my server.<br>
+			Any data entered into the header is parsed and interpreted locally.
+			Your IP might be logged in the webserver's access log.
+			I think systemd deletes log files eventually but I'm not sure.
+		</p>
+		<h2>Cookies</h2>
+		<p>
+			This site doesn't use cookies.<br>
+			When a site sets a cookie, it's sent to the server with every request for every asset thats requested until it expires.
+			I want all requests to be as small, and as fast as possible. Using cookies would be counter to that goal.
+		</p>
+		<p>
+			If for some reason you want to set a cookie for this site, youre welcome to do so using the `cookie` command. :)
+		</p>
+
+		<h2>Session Storage</h2>
+		<p>
+			Session storage is a javascript feature where data can be stored in your browser for the duration of the current session.
+			When a tab or window is closed, the data stored in session storage is deleted.
+		</p>
+		<p>
+			The site uses session storage to cache information about the filesystem.
+			This is to make moving around the filesystem more responsive.
+			Commands you type into the header are also stored in session storage.
+			You can cycle through your previous entries by pressing the up arrow when the header has focus.
+		</p>
+
+		<h2>Local Storage</h2>
+		<p>
+			Local storage is a javascript feature where data can be stored in your browser and the data will be saved for subsequent visits.
+		</p>
+		<p>
+			The site doesn't use Local Storage right now, but ultimatly the plan is to have an option to move some of the stuff in Session Storage into Local Storage.
+		</p>
+	</body>
+</html>

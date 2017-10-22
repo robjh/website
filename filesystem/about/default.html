@@ -10,10 +10,27 @@
 		<p>To see a roster of the currently implemented commands, type: ls /bin; ls /usr/bin;</p>
 
 		<h2>This Site</h2>
-		<p>It's mostly vanilla Javascript. The site uses html5 features to improve performance, and maintain the shell between pages.</p>
+		<p>
+			It's mostly vanilla Javascript. The site uses html5 features to improve performance, and maintain the shell between pages.
+			Stuff typed into the prompt is not sent to the server, and by default your session is kept entirly in local storage.
+			The act of navigating around the filesystem will access static assets on the server.
+			As such, for the normal operation of the site; no database queries are executed, no session IDs are exchanged, and no cookies are set.
+			I also have no intention of adding any analitics, social media sharing buttons, or any other kind of third party hosted scripts.
+		</p>
 
 		<p>
-			Recent work as been focused on rewriting the old propriatry backend to a set of static files and a python generator. The generator and all the raw files get pushed to github every night, if the server's working properly, and can be found at <a href="https://github.com/robjh/website">https://github.com/robjh/website</a>.<br>
+			Recent work as been focused on rewriting the old propriatry backend to a set of static files and a python generator.
+			The generator and all the raw files get pushed to github every night, if the server's working properly, and can be found at <a href="https://github.com/robjh/website">https://github.com/robjh/website</a>.<br>
 		</p>
+
+		<h2>Your Data</h2>
+		<p>Theres a page for that; <a href="yourdata.html" data-path="/about/yourdata.html" data-type="html">yourdata.html</a>
+
+		<h2>Todo List</h2>
+		<ul>
+			<li>Add svg support so I can automatically upload documents to some directory. Ideally the upload process should be as hands off as possible.</li>
+			<li>Document more stuff.</li>
+			<li>Add more commands. Support moving stuff around in the filesystem and file permissions.</li>
+		<ul>
 	</body>
 </html>
