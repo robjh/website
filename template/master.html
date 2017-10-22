@@ -41,16 +41,9 @@ ${body}
 			chroot:  "${uri}",
 		});
 
-		var path = window.location.pathname.substr(fs.chroot.length);
-		var index_specified = path.endsWith("index.html");
-		if (index_specified) {
-			path = path.substring(0, path.length - 10);
-		}
+		var path = "${pwd}${name}";
 		var target = fs.root.path_resolve_create(path, "${doctype}");
 		var pwd = target.is_dir ? target : target.parent();
-		if (target.is_dir && !index_specified && target.children['default.html']) {
-			target = pwd.children['default.html'];
-		}
 
 		var page = robjh.page({
 			container:  document.getElementById('site_container'),
@@ -100,6 +93,8 @@ ${body}
 					}
 				}
 			}
+
+			${js_copybody}
 		}
 		page.fix_initial_history(target);
 

@@ -184,14 +184,16 @@ class Html_Parser(HTMLParser):
 
 class Html():
 	subs = {}
-	def __init__(self, pwd="/", title=None, body=None):
+	def __init__(self, name, pwd="/", title=None, body=None):
 		self.subs = {
 			"title":title,
 			"body":body,
 			"domain":_domain,
 			"uri":_uri,
 			"doctype":"html",
-			"css":""
+			"css":"",
+			"name":name,
+			"js_copybody":"target.body = page.content_get();"
 		}
 		self.path(pwd)
 
@@ -235,10 +237,11 @@ class Html():
 
 class Html_Index(Html):
 	def __init__(self, path, index):
-		super().__init__()
+		super().__init__(name="")
 		self.path(path)
 		self.index(index)
 		self.subs["doctype"] = "dir"
+		self.subs["js_copybody"] = ""
 		self.path(path)
 
 	def path(self, str):
