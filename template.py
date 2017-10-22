@@ -205,7 +205,7 @@ class Html():
 
 	def parse(self, str):
 		parser = Html_Parser()
-		parser.feed(str)
+		parser.feed(Template(str).substitute(self.subs))
 		self.subs["body"] = parser.contents
 		self.subs["title"] = parser.title
 		self.subs["css"] = parser.css

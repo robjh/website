@@ -4,7 +4,7 @@
 		<title>Danger!</title>
 		<style>
 			body {
-				background: #000 url(./bg.png);
+				background: #000 url(${uri}${pwd}bg.png);
 				background-size: 64px 64px;
 			}
 			#oldman_container {
@@ -41,11 +41,11 @@
 	<body>
 		<div id="oldman_container">
 			<div id="text">
-				<img src="./oldman.png" alt="It's dangerous to go alone! Take this." />
+				<img src="${uri}${pwd}oldman.png" alt="It's dangerous to go alone! Take this." />
 			</div>
 			<div id="sword">
-				<a href="http://robjh.com/">
-					<img src="./sword.png" alt="A picture of a wooden sword, and a link to the past^H^H^H^Hhomepage." />
+				<a href="${uri}/" data-path="/" data-type="dir">
+					<img src="${uri}${pwd}sword.png" alt="A picture of a wooden sword, and a link to the past^H^H^H^Hhomepage." />
 				</a>
 			</div>
 		</div>
