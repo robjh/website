@@ -5,7 +5,7 @@
 	<meta name="viewport" content="width=device-width, initial-scale=0.8">
 	<title>${title}</title>
 	<link type="text/css" href="${uri}/lib/style.css" rel="stylesheet" />
-	<style>${css}</style>
+	<style><!-- ${css} --></style>
 </head>
 <body>
 <div id="master">
@@ -27,11 +27,11 @@ ${body}
 
 </div>
 <script src="${uri}/lib/aojs/ao.js"></script>
-<script type="text/javascript">
+<script type="text/javascript"><!--
 	var ao = ao_get().include('terminal');
-</script>
+--></script>
 <script src="${uri}/lib/robjh.js"></script>
-<script>
+<script><!--
 'use strict';
 
 
@@ -114,6 +114,6 @@ ${body}
 
 	});
 
-</script>
+--></script>
 </body>
 </html>
