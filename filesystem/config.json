@@ -3,6 +3,10 @@
 		"config.json": {
 			"action":"ignore"
 		},
+		"favicon.ico": {
+			"action":"raw",
+			"listed":false
+		},
 		"lib/style.css": {
 			"action":"raw"
 		},

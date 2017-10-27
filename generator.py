@@ -128,12 +128,13 @@ def main():
 					continue
 				if config["files"][mutualpath]["action"] == "raw":
 					path.copy_file(mutualpath)
-					index.append({
-						"name": file,
-						"type": "file",
-						"mime": mimetypes.guess_type(mutualpath)[0],
-						"size": os.path.getsize(path.dest(path.MUTUAL, mutualpath))
-					})
+					if not "listed" in config["files"][mutualpath] or config["files"][mutualpath]["listed"]:
+						index.append({
+							"name": file,
+							"type": "file",
+							"mime": mimetypes.guess_type(mutualpath)[0],
+							"size": os.path.getsize(path.dest(path.MUTUAL, mutualpath))
+						})
 					if file in listing: listing.remove(file)
 					continue
 
