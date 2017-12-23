@@ -85,16 +85,18 @@ class Path_Reformatter:
 		shutil.copy(self.src(self.MUTUAL, mutual), self.dest(self.MUTUAL, mutual))
 
 
-
-def main():
-	global webpage_template
+def parse_args():
 	parser = argparse.ArgumentParser(description='Renders a website from a template of static files.')
 	parser.add_argument('--skel', help='A directory containing the skeleton of the website.')
 	parser.add_argument('--webdir', help='Directory where the site will be rendered to.')
 	parser.add_argument('--url', help='The web facing address of --webdir')
 	parser.add_argument('--minify', action='store_true', help='Runs HTML, Javascript and CSS files through a minifier.')
 	parser.add_argument('--redirect', choices=['none', 'htaccess', 'symlink'], help='Choose how to redirect default_ajax_action.json to the right file for every directory. If "none" is chosen, you should make arrangements to perform the redirects some other way. eg, modifying the server config', default='htaccess')
-	args = parser.parse_args()
+	return parser.parse_args()
+
+def main():
+	global webpage_template
+	args = parse_args()
 	path = Path_Reformatter(src=args.skel, dest=args.webdir)
 
 	template.load(args.url)
@@ -124,19 +126,23 @@ def main():
 			mutualpath = path.mutual(path.SRC, os.path.join(path_src, file) )
 
 			if mutualpath in config["files"]:
-				if config["files"][mutualpath]["action"] == "ignore":
-					continue
-				if config["files"][mutualpath]["action"] == "raw":
-					path.copy_file(mutualpath)
-					if not "listed" in config["files"][mutualpath] or config["files"][mutualpath]["listed"]:
-						index.append({
-							"name": file,
-							"type": "file",
-							"mime": mimetypes.guess_type(mutualpath)[0],
-							"size": os.path.getsize(path.dest(path.MUTUAL, mutualpath))
-						})
-					if file in listing: listing.remove(file)
-					continue
+				if "action" in config["files"][mutualpath]:
+					if config["files"][mutualpath]["action"] == "ignore":
+						continue
+					if config["files"][mutualpath]["action"] == "raw":
+						path.copy_file(mutualpath)
+						if not "listed" in config["files"][mutualpath] or config["files"][mutualpath]["listed"]:
+							index.append({
+								"name": file,
+								"type": "file",
+								"mime": mimetypes.guess_type(mutualpath)[0],
+								"size": os.path.getsize(path.dest(path.MUTUAL, mutualpath))
+							})
+						if file in listing: listing.remove(file)
+						continue
+
+				if "forcetype" in config["files"][mutualpath]:
+					ext = "." + config["files"][mutualpath]["forcetype"]
 
 			if file in listing: listing.remove(file)
 
@@ -166,6 +172,18 @@ def main():
 					"mime": mimetypes.guess_type(mutualpath)[0],
 					"size": os.path.getsize(path.dest(path.MUTUAL, mutualpath))
 				})
+
+			elif ext in [".txt", ".conf"]:
+				path.copy_file(mutualpath)
+				index.append({
+					"name": file,
+					"type": "file",
+					"mime": "text/plain",
+					"size": os.path.getsize(path.dest(path.MUTUAL, mutualpath))
+				})
+
+			else:
+				print("Found unknown file {}, type: {}".format(mutualpath, mimetypes.guess_type(mutualpath)))
 
 
 

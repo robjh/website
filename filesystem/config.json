@@ -15,6 +15,9 @@
 		},
 		"lib/aojs/ao.js": {
 			"action":"raw"
+		},
+		"about/lorem_ipsum": {
+			"forcetype":"txt"
 		}
 	}
 }
