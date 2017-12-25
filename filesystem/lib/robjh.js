@@ -1051,12 +1051,110 @@ var robjh = (function() {
 			return argv.realpath;
 		});
 
+		p.file_helper_base = (function(h) {
+			h = h || {};
+			var h_self = {};
+			h_self.gen_page = (function(frag) {
+				/* Not sure this'll ever be called */
+				frag.appendChild(ao.dom_node('p', {
+					text: "Unsupported file type."
+				}));
+			});
+			h_self.load = (function() {});
+			h_self.is_loaded = (function() { return false; });
+			return h_self;
+		});
+		p.file_helper_image = (function(h) {
+			h = h || {};
+			var h_self = p.file_helper_base(h);
+			h.img = new Image();
+			h.imgid = "img" + Math.floor(Math.random()*1000000);
+			h_self.gen_page = (function(frag) {
+				if (!h.img.complete) h_self.load();
+				frag.appendChild(ao.dom_node('div', {
+					appendChild: [
+						ao.dom_node('input', {
+							type: 'checkbox',
+							id: h.imgid,
+							name: h.imgid,
+							className: "hidden"
+						}),
+						ao.dom_node('label', {
+							appendChild: h.img,
+							"htmlFor": h.imgid
+						})
+					],
+					className: "scaling_image"
+				}));
+			});
+			h_self.load = (function() {
+				h.img.src = self.realpath();
+			});
+			h_self.is_loaded = (function() {
+				return h.img.complete;
+			});
+			return h_self;
+		});
+		p.file_helper_text = (function(h) {
+			h = h || {};
+			var h_self = p.file_helper_base(h);
+			h.data = "";
+			h.textid = "text" + Math.floor(Math.random()*1000000);
+			h.complete = false;
+			h_self.gen_page = (function(frag) {
+				if (!h.complete) h_self.load();
+				frag.appendChild(ao.dom_node('pre', {
+					text: h.data,
+					id: h.textid
+				}));
+			});
+			h_self.load = ao.state_machine({ states: {
+				ajax_request: function(sm) {
+					sm.xhr = new XMLHttpRequest();
+					sm.xhr.open('GET', self.fs.chroot + self.path());
+					sm.xhr.setRequestHeader("X-Requested-With", "xmlhttprequest");
+					sm.xhr.setRequestHeader('Content-Type', 'text/plain; charset=UTF-8');
+					sm.xhr.overrideMimeType('text/plain; charset=UTF-8');
+					sm.xhr.onload = sm;
+					sm.xhr.send();
+					return sm.yield("ajax_update");
+				},
+				ajax_update: function(sm) {
+
+// problems; no error-checking. possible issue if someone navigates away before the page is loaded.
+
+					h.data = sm.xhr.responseText;
+					document.getElementById(h.textid).appendChild(document.createTextNode(h.data));
+					return sm.fnc.yield("ajax_request");
+				},
+			}});
+			h_self.is_loaded = (function() {
+				return h.complete;
+			});
+			return h_self;
+		});
+		p.helper = null;
+
 		self.apply_update_recursive = (function(update) {
 			if (update.type != 'file') return;
 
 			p.mime = update.mime;
 			p.size = update.size;
 			p.apply_update_generic(update);
+
+			switch (p.mime) {
+			  case "image/png":
+			  case "image/jpeg":
+			  case "image/svg+xml":
+				p.helper = p.file_helper_image();
+				break;
+			  case "text/plain":
+				p.helper = p.file_helper_text();
+				break;
+			  default:
+				p.helper = p.file_helper_base();
+				break;
+			}
 
 			if (ao.array_contains(p.mime_viewable, update.mime)) {
 				self.local = true;
@@ -1082,39 +1180,14 @@ var robjh = (function() {
 
 		self.gen_page = (function() {
 			var frag = document.createDocumentFragment();
-
-			switch (self.mime()) {
-			  case "image/png":
-			  case "image/jpeg":
-			  case "image/svg+xml":
-				var imgid = "img" + Math.floor(Math.random()*1000000);
-
-				frag.appendChild(ao.dom_node('div', {
-					appendChild: [
-						ao.dom_node('input', {
-							type: 'checkbox',
-							id: imgid,
-							name: imgid,
-							className: "hidden"
-						}),
-						ao.dom_node('label', {
-							appendChild: ao.dom_node('img', {
-								src: self.realpath()
-							}),
-							"htmlFor": imgid
-						})
-					],
-					className: "scaling_image"
-				}));
-				break;
-
-			  case "image/svg+xml":
-				// the file will have to be downloaded at some point
-				break;
-			}
+			p.helper.gen_page(frag);
 			return {
 				body: frag
 			};
+		});
+
+		self.load = (function() {
+			p.helper.load();
 		});
 
 		return self;

@@ -101,7 +101,7 @@ ${body}
 		document.getElementById("prerendered_prompt").outerHTML=''
 		var term = ao.terminal({
 			container:  document.getElementById("terminal"),
-			auto_focus: true,
+			auto_focus: false,
 			append:     true,
 			process: robjh.shell,
 			process_init_argv: {
