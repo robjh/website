@@ -46,7 +46,7 @@ var robjh = (function() {
 		self.chroot = argv.chroot;
 
 		// controls the minimum time between directory refreshes
-		self.expires = argv.expires || 3600;
+		self.expires = argv.expires || 3600000;
 
 		argv.node_class = argv.node_class || fs.node;
 
@@ -55,12 +55,12 @@ var robjh = (function() {
 			node_class: argv.node_class
 		});
 		if (argv.hint) {
-			self.root.apply_update_recursive(argv.hint);
+			self.root.apply_update_recursive(argv.hint, 0);
 		}
 		if (g.sessionStorage_works) {
 			var saved_fs = window.sessionStorage.getItem('fs');
 			if (saved_fs) {
-				self.root.apply_update_recursive(JSON.parse(saved_fs));
+				self.root.apply_update_recursive(JSON.parse(saved_fs), 0);
 			}
 		}
 		self.save = (function() {
@@ -188,7 +188,7 @@ var robjh = (function() {
 							working_node.path_resolve_ajax(p.argv[1], function(node) {
 								working_node = node;
 								argv.term.interupt();
-							}, true);
+							}, false);
 							return p.yield("output");
 						}
 						return p.continue("output");
@@ -739,6 +739,9 @@ var robjh = (function() {
 			return self.local;
 		});
 		self.updated = 0;
+		self.wants_update = (function() {
+			return self.updated < (Date.now() - self.fs.expires);
+		});
 		self.type = (function() {
 			return p.type;
 		});
@@ -832,7 +835,7 @@ var robjh = (function() {
 
 		argv.name = argv.name || '';
 
-		self.update_ajax = (function(callback) {
+		self.update_ajax = (function(callback, force_listing) {
 			ao.state_machine({ states: {
 				ajax_request: function(sm) {
 					var uri = self.url();
@@ -844,11 +847,11 @@ var robjh = (function() {
 					if (
 						uri[uri.length-1] == '/'
 					) {
-						append = "default_ajax_action.json";
+						append = force_listing ? "index.html.json" : "default_ajax_action.json";
 					} else if (uri.lastIndexOf('/') > uri.lastIndexOf('.')) {
-						append = "/default_ajax_action.json";
+						append = force_listing ? "/index.html.json" : "/default_ajax_action.json";
 					} else if (/index.html$/.test(uri)) {
-						append = "/default_ajax_action.json";
+						append = force_listing ? "/index.html.json" : "/default_ajax_action.json";
 						uri = uri.substr(0, uri.length - 10);
 					} else if (/.html$/.test(uri)) {
 						append = ".json";
@@ -873,7 +876,7 @@ var robjh = (function() {
 
 					  case 200: // Ok.
 						var index = JSON.parse(sm.xhr.responseText);
-						self.apply_update_recursive(index);
+						self.apply_update_recursive(index, Date.now());
 						self.fs.save();
 						sm.success = true;
 						break;
@@ -893,11 +896,11 @@ var robjh = (function() {
 			}})();
 		});
 
-		p.apply_update_generic = (function(update) {
+		p.apply_update_generic = (function(update, date) {
 			self.local = (true == update.local);
 
-			if (update.complete) {
-				self.updated = Date.now();
+			if (date > self.updated) {
+				self.updated = date;
 			}
 		});
 
@@ -905,7 +908,7 @@ var robjh = (function() {
 		self.event_click = (function(e) {
 			e = e || window.event;
 			window.setTimeout(function() {
-				if (!self.local && self.updated + self.fs.expires < Date.now()) {
+				if (!self.local && self.wants_update()) {
 					self.update_ajax(function(success) {
 						if (success) {
 							if (
@@ -970,7 +973,7 @@ var robjh = (function() {
 		p.css = "";
 		p.size = argv.size;
 
-		self.apply_update_recursive = (function(update) {
+		self.apply_update_recursive = (function(update, date) {
 			if (update.type != 'html') return;
 
 			self.body   = update.body;
@@ -978,7 +981,7 @@ var robjh = (function() {
 			if (update.css) p.css = update.css;
 			if (update.size) p.size = update.size;
 
-			p.apply_update_generic(update);
+			p.apply_update_generic(update, date);
 		});
 
 		self.mime = (function() {
@@ -1135,12 +1138,12 @@ var robjh = (function() {
 		});
 		p.helper = null;
 
-		self.apply_update_recursive = (function(update) {
+		self.apply_update_recursive = (function(update, date) {
 			if (update.type != 'file') return;
 
 			p.mime = update.mime;
 			p.size = update.size;
-			p.apply_update_generic(update);
+			p.apply_update_generic(update, date);
 
 			switch (p.mime) {
 			  case "image/png":
@@ -1300,7 +1303,7 @@ var robjh = (function() {
 					// arrived at destination;
 					if (!sm.node.local && (
 						force ||
-						sm.node.updated + sm.node.fs.expires < Date.now()
+						sm.node.wants_update()
 					)) {
 						sm.handler = "ajax_update";
 						return sm.continue("ajax_request");
@@ -1351,7 +1354,7 @@ var robjh = (function() {
 					  case 200: // Ok.
 						try {
 							var update = JSON.parse(sm.xhr.responseText);
-							sm.node.apply_update_recursive(update);
+							sm.node.apply_update_recursive(update, Date.now());
 						} catch (e) {
 							console.error(
 								"A resource exists on the server but the resource did not return json."
@@ -1381,7 +1384,7 @@ var robjh = (function() {
 						var name = sm.path[sm.path.length - 1];
 						try {
 							var update = JSON.parse(sm.xhr.responseText);
-							sm.node = sm.node.apply_update_as_child(name, update);
+							sm.node = sm.node.apply_update_as_child(name, update, Date.now());
 						} catch (e) {
 							// the server didnt reply with json. this must be a file!
 							sm.node = sm.node.children[sm.path[0]] = fs.element_file({
@@ -1416,7 +1419,7 @@ var robjh = (function() {
 		});
 
 
-		self.apply_update_as_child = (function(name, update) {
+		self.apply_update_as_child = (function(name, update, date) {
 			switch (update.type) {
 			  case "dir":
 				self.mkdir(name);
@@ -1441,10 +1444,10 @@ var robjh = (function() {
 				return self.children[name];
 				break;
 			}
-			self.children[name].apply_update_recursive(update);
+			self.children[name].apply_update_recursive(update, date);
 			return self.children[name];
 		});
-		self.apply_update_recursive = (function(update) {
+		self.apply_update_recursive = (function(update, date) {
 			if (update.type != "dir") {
 				if (update.type == "html") {
 					if (!self.children['default.html']) {
@@ -1454,7 +1457,7 @@ var robjh = (function() {
 							fs: self.fs
 						});
 					}
-					self.children['default.html'].apply_update_recursive(update);
+					self.children['default.html'].apply_update_recursive(update, date);
 				}
 				return;
 			}
@@ -1462,9 +1465,9 @@ var robjh = (function() {
 			if (update.children) {
 				for (var child in update.children) {
 					if (!self.children[child]) {
-						self.apply_update_as_child(child, update.children[child]);
+						self.apply_update_as_child(child, update.children[child], date);
 					} else {
-						self.children[child].apply_update_recursive(update.children[child]);
+						self.children[child].apply_update_recursive(update.children[child], date);
 					}
 
 					// remove this key from the list of children to be deleted.
@@ -1486,7 +1489,7 @@ var robjh = (function() {
 						delete self.children[c_keys[i]];
 					}
 				}
-				p.apply_update_generic(update);
+				p.apply_update_generic(update, date);
 			}
 		});
 

@@ -75,22 +75,36 @@ ${body}
 			return sm.continue(sm.next);
 		},
 
-		has_frag: function(sm) {
+		has_frag: function(sm, ctx) {
 			if (window.location.hash && window.location.hash.startsWith('#./')) {
 				// This might need to call update on the parent node to see if the file exists
 				// Which we can do now, because this is a state machine.
-				var hash_node = g.pwd.path_resolve(window.location.hash.substr(1));
-				if (hash_node) {
-					g.target = hash_node;
-				//	g.page.node_change_inplace(g.target);
-					g.pwd = target.is_dir ? target : target.parent();
+				ctx.hash_node = g.pwd.path_resolve(window.location.hash.substr(1));
+				if (ctx.hash_node) {
+					return sm.continue("go_to_hash_node");
 				}
-				return sm.continue("change_inplace");
-			} else if (g.target.has_local_content()) {
-				return sm.continue("change_inplace");
-			} else {
-				return sm.continue("setup_page");
+				if (g.pwd.wants_update()) {
+					g.pwd.update_ajax(sm, true);
+					return sm.yield("try_updating_parent");
+				}
+				// The frag appears to be bad. continue as though it doesn't exist.
 			}
+
+			return sm.continue("setup_page");
+		},
+
+		try_updating_parent: function(sm, ctx) {
+			ctx.hash_node = g.pwd.path_resolve(window.location.hash.substr(1));
+			if (ctx.hash_node) {
+				return sm.continue("go_to_hash_node");
+			}
+		},
+
+		go_to_hash_node: function(sm, ctx) {
+			g.target = ctx.hash_node;
+		//	g.page.node_change_inplace(g.target);
+			g.pwd = g.target.is_dir ? g.target : g.target.parent();
+			return sm.continue("change_inplace");
 		},
 
 		change_inplace: function(sm) {
@@ -99,19 +113,23 @@ ${body}
 		},
 
 		setup_page: function(sm, ctx) {
-			// and setup onclick events for links (pre-rendered specific).
-			for (var i = 0, l = ctx.a_arr.length ; i < l ; ++i) {
-				var path = ctx.a_arr[i].getAttribute('data-path');
-				var type = ctx.a_arr[i].getAttribute('data-type');
+			if (g.target.has_local_content()) {
+				return sm.continue("change_inplace");
+			} else {
+				// and setup onclick events for links (pre-rendered specific).
+				for (var i = 0, l = ctx.a_arr.length ; i < l ; ++i) {
+					var path = ctx.a_arr[i].getAttribute('data-path');
+					var type = ctx.a_arr[i].getAttribute('data-type');
 
-				if (path) {
-					var node = g.pwd.path_resolve(path);
+					if (path) {
+						var node = g.pwd.path_resolve(path);
 
-					if (node.type() == robjh.fs.types[type]) {
-						ctx.a_arr[i].addEventListener('click', node.event_click);
-						ctx.a_arr[i].href = node.url();
-					} else {
-						console.error("unknown type ("+type+") for path ("+path+") in pre-rendered content.");
+						if (node.type() == robjh.fs.types[type]) {
+							ctx.a_arr[i].addEventListener('click', node.event_click);
+							ctx.a_arr[i].href = node.url();
+						} else {
+							console.error("unknown type ("+type+") for path ("+path+") in pre-rendered content.");
+						}
 					}
 				}
 			}
