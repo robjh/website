@@ -1073,7 +1073,7 @@ var robjh = (function() {
 			h.img = new Image();
 			h.imgid = "img" + Math.floor(Math.random()*1000000);
 			h_self.gen_page = (function(frag) {
-				if (!h.img.complete) h_self.load();
+				if (!h.complete) h_self.load();
 				frag.appendChild(ao.dom_node('div', {
 					appendChild: [
 						ao.dom_node('input', {
