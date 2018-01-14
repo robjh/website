@@ -34,85 +34,120 @@ ${body}
 <script><!--
 'use strict';
 
+	var g = {
+		path: "${pwd}${name}",
+	};
 
-	ao.ready(function() {
+	ao.ready(ao.state_machine({ states: {
+		create_objects: function(sm) {
+			g.fs = robjh.fs({
+				chroot: "${uri}",
+			});
 
-		var fs = robjh.fs({
-			chroot:  "${uri}",
-		});
+			g.target = g.fs.root.path_resolve_create(g.path, "${doctype}");
+			g.pwd = g.target.is_dir ? g.target : g.target.parent();
 
-		var path = "${pwd}${name}";
-		var target = fs.root.path_resolve_create(path, "${doctype}");
-		var pwd = target.is_dir ? target : target.parent();
+			g.page = robjh.page({
+				container:  document.getElementById('site_container'),
+				global:     true,
+				fs:         g.fs
+			});
 
-		var page = robjh.page({
-			container:  document.getElementById('site_container'),
-			global:     true,
-			fs:         fs
-		});
+			return sm.continue(sm.next);
+		},
 
-		/* expand the filesystem model */
-		var a_arr = Array.prototype.slice.call(
-			document.getElementById('site_container').getElementsByTagName('a')
-		);
-		for (var i = 0, l = a_arr.length ; i < l ; ++i) {
-			var path = a_arr[i].getAttribute('data-path');
-			var type = a_arr[i].getAttribute('data-type');
-			var mime = a_arr[i].getAttribute('data-mime');
-			var size = a_arr[i].getAttribute('data-size');
-
-			if (path) {
-				var node = pwd.path_resolve_create(path, type, mime, size);
-			}
-		}
-
-		if (window.location.hash && window.location.hash.startsWith('#./')) {
-			var hash_node = pwd.path_resolve(window.location.hash.substr(1));
-			if (hash_node) {
-				target = hash_node;
-				page.node_change_inplace(target);
-				pwd = target.is_dir ? target : target.parent();
-			}
-		} else if (target.has_local_content()) {
-			page.node_change_inplace(target);
-		} else {
-
-			/* and setup onclick events for links. */
-			for (var i = 0, l = a_arr.length ; i < l ; ++i) {
-				var path = a_arr[i].getAttribute('data-path');
-				var type = a_arr[i].getAttribute('data-type');
+		expand_filesystem: function(sm, ctx) {
+			// expand the filesystem model using hyperlinks found on the pre-rendered page
+			ctx.a_arr = Array.prototype.slice.call(
+				document.getElementById('site_container').getElementsByTagName('a')
+			);
+			for (var i = 0, l = ctx.a_arr.length ; i < l ; ++i) {
+				var path = ctx.a_arr[i].getAttribute('data-path');
+				var type = ctx.a_arr[i].getAttribute('data-type');
+				var mime = ctx.a_arr[i].getAttribute('data-mime');
+				var size = ctx.a_arr[i].getAttribute('data-size');
 
 				if (path) {
-					var node = pwd.path_resolve(path);
+					var node = g.pwd.path_resolve_create(path, type, mime, size);
+				}
+			}
+
+			return sm.continue(sm.next);
+		},
+
+		has_frag: function(sm) {
+			if (window.location.hash && window.location.hash.startsWith('#./')) {
+				// This might need to call update on the parent node to see if the file exists
+				// Which we can do now, because this is a state machine.
+				var hash_node = g.pwd.path_resolve(window.location.hash.substr(1));
+				if (hash_node) {
+					g.target = hash_node;
+				//	g.page.node_change_inplace(g.target);
+					g.pwd = target.is_dir ? target : target.parent();
+				}
+				return sm.continue("change_inplace");
+			} else if (g.target.has_local_content()) {
+				return sm.continue("change_inplace");
+			} else {
+				return sm.continue("setup_page");
+			}
+		},
+
+		change_inplace: function(sm) {
+			g.page.node_change_inplace(g.target);
+			return sm.continue("start_prompt");
+		},
+
+		setup_page: function(sm, ctx) {
+			// and setup onclick events for links (pre-rendered specific).
+			for (var i = 0, l = ctx.a_arr.length ; i < l ; ++i) {
+				var path = ctx.a_arr[i].getAttribute('data-path');
+				var type = ctx.a_arr[i].getAttribute('data-type');
+
+				if (path) {
+					var node = g.pwd.path_resolve(path);
 
 					if (node.type() == robjh.fs.types[type]) {
-						a_arr[i].addEventListener('click', node.event_click);
-						a_arr[i].href = node.url();
+						ctx.a_arr[i].addEventListener('click', node.event_click);
+						ctx.a_arr[i].href = node.url();
 					} else {
 						console.error("unknown type ("+type+") for path ("+path+") in pre-rendered content.");
 					}
 				}
 			}
 
+			return sm.continue(sm.next);
+		},
+
+		page_javascript: function(sm) {
 			${js_copybody}
+			return sm.continue(sm.next);
+		},
+
+		start_prompt: function(sm) {
+			document.getElementById("prerendered_prompt").outerHTML=''
+			var term = ao.terminal({
+				container:  document.getElementById("terminal"),
+				auto_focus: false,
+				append:     true,
+				process: robjh.shell,
+				process_init_argv: {
+					fs:         g.fs,
+					pwd:        g.pwd,
+					hostname:   '${domain}',
+					username:   'guest',
+				}
+			});
+
+			return sm.yield("complete");
+		},
+
+		complete: function(sm) {
+			console.log("onready complete.")
+			return sm.yield();
 		}
-		page.fix_initial_history(target);
 
-		document.getElementById("prerendered_prompt").outerHTML=''
-		var term = ao.terminal({
-			container:  document.getElementById("terminal"),
-			auto_focus: false,
-			append:     true,
-			process: robjh.shell,
-			process_init_argv: {
-				fs:         fs,
-				pwd:        pwd,
-				hostname:   '${domain}',
-				username:   'guest',
-			}
-		});
-
-	});
+	} }));
 
 --></script>
 </body>

@@ -193,7 +193,7 @@ class Html():
 			"doctype":"html",
 			"css":"",
 			"name":name,
-			"js_copybody":"target.body = page.content_get();"
+			"js_copybody":"g.target.body = g.page.content_get();"
 		}
 		self.path(pwd)
 
