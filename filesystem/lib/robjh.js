@@ -1161,7 +1161,28 @@ var robjh = (function() {
 			});
 			return h_self;
 		});
-		p.helper = null;
+
+		p.create_helper = (function() {
+			var ret = false;
+			switch (p.mime) {
+			  case "image/png":
+			  case "image/jpeg":
+			  case "image/svg+xml":
+				p.helper = p.file_helper_image();
+				ret = true;
+				break;
+			  case "text/plain":
+				p.helper = p.file_helper_text();
+				ret = true;
+				break;
+			  default:
+//				p.helper = p.file_helper_base();
+				p.helper = null;
+				break;
+			}
+			return ret;
+		});
+		p.create_helper();
 
 		self.apply_update_recursive = (function(update, date) {
 			if (update.type != 'file') return;
@@ -1169,25 +1190,13 @@ var robjh = (function() {
 			p.mime = update.mime;
 			p.size = update.size;
 			p.apply_update_generic(update, date);
-
-			switch (p.mime) {
-			  case "image/png":
-			  case "image/jpeg":
-			  case "image/svg+xml":
-				p.helper = p.file_helper_image();
-				break;
-			  case "text/plain":
-				p.helper = p.file_helper_text();
-				break;
-			  default:
-				p.helper = p.file_helper_base();
-				break;
-			}
+			p.create_helper();
 
 			if (ao.array_contains(p.mime_viewable, update.mime)) {
 				self.local = true;
 			}
 		});
+
 
 		self.mime = (function() {
 			return p.mime;
