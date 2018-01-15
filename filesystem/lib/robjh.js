@@ -188,7 +188,7 @@ var robjh = (function() {
 							working_node.path_resolve_ajax(p.argv[1], function(node) {
 								working_node = node;
 								argv.term.interupt();
-							}, false);
+							}, true);
 							return p.yield("output");
 						}
 						return p.continue("output");
