@@ -907,28 +907,51 @@ var robjh = (function() {
 		// attach this to the onclick events of items that lead to this node
 		self.event_click = (function(e) {
 			e = e || window.event;
-			window.setTimeout(function() {
-				if (!self.local && self.wants_update()) {
-					self.update_ajax(function(success) {
-						if (success) {
-							if (
-								self.is_dir &&
-								self.children['default.html'] &&
-								self.children['default.html'].is_html
-							) {
-								g.page.node_change(self.children['default.html']);
-							} else {
-								g.page.node_change(self);
-							}
-						} else {
-						// the ajax failed so perform the default link action
-							window.location = self.fs.chroot + self.pwd();
-						}
-					});
-				} else {
-					g.page.node_change(self);
-				}
-			}, 0);
+
+			window.setTimeout(ao.state_machine({ states: {
+				// first update the node if needed.
+				// then change to "default.html", if the node is a dir and that exists.
+				// then, optionally update default.html if needed.
+				// finally, change to the node.
+				setup: function(sm, ctx) {
+					ctx.node = self;
+					return sm.continue(sm.next);
+				},
+				perform_update: function(sm, ctx) {
+					ctx.success = false;
+					if (!ctx.node.local && ctx.node.wants_update()) {
+						ctx.node.update_ajax(function(success) {
+							ctx.success = success;
+							sm();
+						});
+						return sm.yield(sm.next);
+					}
+					return sm.continue("look_for_default");
+				},
+				ajax_complete: function(sm, ctx) {
+					// the ajax failed so perform the default link action
+					if (!ctx.success) {
+						window.location = ctx.node.fs.chroot + ctx.node.pwd();
+					} else {
+						return sm.continue(sm.next);
+					}
+				},
+				look_for_default: function(sm, ctx) {
+					if (
+						ctx.node.is_dir &&
+						ctx.node.children['default.html'] &&
+						ctx.node.children['default.html'].is_html
+					) {
+						ctx.node = ctx.node.children['default.html'];
+						return sm.continue("perform_update");
+					}
+					return sm.continue(sm.next);
+				},
+				change: function(sm, ctx) {
+					g.page.node_change(ctx.node);
+				},
+			} }), 0);
+
 			e.preventDefault();
 			e.stopPropagation();
 			return false;
@@ -976,10 +999,12 @@ var robjh = (function() {
 		self.apply_update_recursive = (function(update, date) {
 			if (update.type != 'html') return;
 
-			self.body   = update.body;
-			self.pagetitle = update.title;
-			if (update.css) p.css = update.css;
-			if (update.size) p.size = update.size;
+			if (update.complete) {
+				self.body               = update.body;
+				self.pagetitle          = update.title;
+				if (update.css)  p.css  = update.css;
+				if (update.size) p.size = update.size;
+			}
 
 			p.apply_update_generic(update, date);
 		});
