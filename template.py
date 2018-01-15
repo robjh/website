@@ -222,7 +222,8 @@ class Html():
 		ret = {
 			"type":  "html",
 			"title": self.subs["title"],
-			"body":  html_minify(self.subs["body"]) if minify else str(self.subs["body"])
+			"body":  html_minify(self.subs["body"]) if minify else str(self.subs["body"]),
+			"complete": True
 		}
 		if self.subs["css"] != "":
 			ret["css"] = self.subs["css"]

@@ -198,6 +198,7 @@ def main():
 				json_index[item['name']] = item
 			fd.write(json.dumps({
 				"type":"dir",
+				"complete":True,
 				"children":json_index
 			}))
 			if "index.html.json" in listing: listing.remove("index.html.json")

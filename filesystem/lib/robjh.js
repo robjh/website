@@ -899,7 +899,7 @@ var robjh = (function() {
 		p.apply_update_generic = (function(update, date) {
 			self.local = (true == update.local);
 
-			if (date > self.updated) {
+			if (update.complete && date > self.updated) {
 				self.updated = date;
 			}
 		});
