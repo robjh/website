@@ -1768,8 +1768,9 @@ var robjh = (function() {
 	});
 
 	var shell = (function(argv, p) {
-		argv     = argv || {};
-		p        = p    || {};
+		argv     = argv   || {};
+		p        = p      || {};
+		p.name   = p.name || "RobJH Shell";
 		var self = ao.shell(argv, p);
 
 		p.fs = p.fs || argv.fs || argv.pwd.fs;
