@@ -2,6 +2,7 @@ from string import Template
 from html.parser import HTMLParser
 from urllib.parse import urlparse
 from css_html_js_minify import html_minify, js_minify
+from xml.sax.saxutils import escape
 import json
 
 templates = {}
@@ -172,7 +173,7 @@ class Html_Parser(HTMLParser):
 					break
 		def data(self, data):
 			if data.strip() != "":
-				self.stack[-1].children.append(data)
+				self.stack[-1].children.append(escape(data))
 
 
 	def handle_starttag(self, tag, attrs):
