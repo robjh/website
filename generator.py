@@ -146,23 +146,34 @@ def main():
 
 			if file in listing: listing.remove(file)
 
-			if ext == ".html":
-				if file+".json" in listing: listing.remove(file+".json")
-				page = template.Html(name=file, pwd=path.absolute(path.SRC, path_src) )
+			if ext in [".html", ".htm", ".md"]:
+				newname = file[:-len(ext)] + ".html"
+				if newname in listing: listing.remove(newname)
+				if newname+".json" in listing: listing.remove(newname+".json")
+				path_dest = path.dest(path.MUTUAL, mutualpath)[:-len(ext)] + ".html"
+
+				page = None
+				if ext == ".md":
+					page = template.Markdown(name=newname, pwd=path.absolute(path.SRC, path_src) )
+				else:
+					page = template.Html(name=newname, pwd=path.absolute(path.SRC, path_src) )
+
 				with open(path.src(path.MUTUAL, mutualpath), 'r') as fd:
 					page.parse(fd.read())
 
-				with open(path.dest(path.MUTUAL, mutualpath), 'w') as fd:
+				with open(path_dest, 'w') as fd:
 					fd.write(page.render(minify=args.minify))
 
-				with open(path.dest(path.MUTUAL, mutualpath) + ".json", 'w') as fd:
+				with open(path_dest + ".json", 'w') as fd:
 					fd.write(json.dumps(page.as_dict(minify=args.minify)))
+
 				index.append({
-					"name": file,
+					"name": newname,
 					"type": "html",
 					"mime": "text/html",
-					"size": os.path.getsize(path.dest(path.MUTUAL, mutualpath))
+					"size": os.path.getsize(path_dest)
 				})
+
 
 			elif ext in [".jpeg", ".jpg", ".png", ".svg"]:
 				path.copy_file(mutualpath)

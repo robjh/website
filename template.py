@@ -3,7 +3,9 @@ from html.parser import HTMLParser
 from urllib.parse import urlparse
 from css_html_js_minify import html_minify, js_minify
 from xml.sax.saxutils import escape
+import re
 import json
+import markdown2
 
 templates = {}
 
@@ -183,7 +185,7 @@ class Html_Parser(HTMLParser):
 	def handle_data(self, data):
 		self.state_stack[-1].data(data)
 
-class Html():
+class Base_Template():
 	subs = {}
 	def __init__(self, name, pwd="/", title=None, body=None):
 		self.subs = {
@@ -205,13 +207,7 @@ class Html():
 		self.subs["body"] = str
 
 	def parse(self, str):
-		parser = Html_Parser()
-		parser.feed(Template(str).substitute(self.subs))
-		self.subs["body"] = parser.contents
-		self.subs["title"] = parser.title
-		self.subs["css"] = parser.css
-		if parser.css:
-			self.subs["css_header"] = "<style>{}</style>".format(parser.css)
+		0
 
 	def render(self, minify):
 		doc = templates['master'].substitute(self.subs)
@@ -236,6 +232,30 @@ class Html():
 			self.subs["pwd"] = "/"
 		else:
 			self.subs["pwd"] = str + "/"
+
+class Markdown(Base_Template):
+	def __init__(self, name, pwd="/", title=None, body=None):
+		super().__init__(name, pwd, title, body)
+		self.subs["title"] = ""
+
+	def parse(self, str):
+		md = markdown2.Markdown()
+		emacs_vars = md._get_emacs_vars(str)
+		self.subs["body"] = md.convert(Template(re.sub("-\*-.*-\*-", '', str)).substitute(self.subs))
+		self.subs["title"] = emacs_vars["title"]
+
+class Html(Base_Template):
+	def __init__(self, name, pwd="/", title=None, body=None):
+		super().__init__(name, pwd, title, body)
+
+	def parse(self, str):
+		parser = Html_Parser()
+		parser.feed(Template(str).substitute(self.subs))
+		self.subs["body"] = parser.contents
+		self.subs["title"] = parser.title
+		self.subs["css"] = parser.css
+		if parser.css:
+			self.subs["css_header"] = "<style>{}</style>".format(parser.css)
 
 class Html_Index(Html):
 	def __init__(self, path, index):
