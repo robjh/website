@@ -101,6 +101,7 @@ def main():
 
 	template.load(args.url)
 
+	master_index = dict()
 
 	config = load_config(os.path.join(path.dir_src, "config.json"))
 
@@ -108,8 +109,17 @@ def main():
 		if not os.path.exists(path.dest(path.SRC, path_src)):
 			os.mkdir(path.dest(path.SRC, path_src))
 
+		# get a list of files already in the destination, to delete anything unexpected.
 		listing = os.listdir( path.dest(path.SRC, path_src) )
+		if "index.html"               in listing: listing.remove("index.html")
+		if "index.html.json"          in listing: listing.remove("index.html.json")
+		if "default_ajax_action.json" in listing: listing.remove("default_ajax_action.json")
+		if args.redirect == "htaccess" and ".htaccess" in listing: listing.remove(".htaccess")
+
 		index = []
+		if path.mutual(path.SRC, path_src) in master_index:
+			index = master_index[path.mutual(path.SRC, path_src)]
+
 		has_defaulthtml = False
 
 		print("/"+path.mutual(path.SRC, path_src))
@@ -196,44 +206,50 @@ def main():
 			else:
 				print("Found unknown file {}, type: {}".format(mutualpath, mimetypes.guess_type(mutualpath)))
 
+		# remove any unexpected files in the web directory
+		for misc in listing:
+			delete_with_extreme_prejudice(os.path.join(path.dest(path.SRC, path_src), misc))
 
+		master_index[path.mutual(path.SRC, path_src)] = index
 
-		# create index pages
-		index = sorted(index, key=lambda row: (row["type"] != "dir", row["name"]))
-		with open(os.path.join(path.dest(path.SRC, path_src), "index.html"), 'w') as fd:
-			fd.write( template.Html_Index(path.absolute(path.SRC, path_src), index).render(minify=args.minify) )
-			if "index.html" in listing: listing.remove("index.html")
-		with open(os.path.join(path.dest(path.SRC, path_src), "index.html.json"), 'w') as fd:
-			json_index = {}
-			for item in index:
-				json_index[item['name']] = item
-			fd.write(json.dumps({
-				"type":"dir",
-				"complete":True,
-				"children":json_index
-			}))
-			if "index.html.json" in listing: listing.remove("index.html.json")
+	# generate index pages
+	pathobj = Path_Reformatter(src="", dest=args.webdir)
+	for key in master_index:
+		create_index_page(pathobj, key, master_index[key], args.redirect)
 
+def create_index_page(path, path_mut, index, redirect_mode):
+	# create index pages
+	index = sorted(index, key=lambda row: (row["type"] != "dir", row["name"]))
+	with open(os.path.join(path.dest(path.MUTUAL, path_mut), "index.html"), 'w') as fd:
+		fd.write( template.Html_Index(path.absolute(path.MUTUAL, path_mut), index).render(minify=False) )
+	with open(os.path.join(path.dest(path.MUTUAL, path_mut), "index.html.json"), 'w') as fd:
+		json_index = {}
+		for item in index:
+			json_index[item['name']] = item
+		fd.write(json.dumps({
+			"type":"dir",
+			"complete":True,
+			"children":json_index
+		}))
 
-		if args.redirect == "symlink":
-			# create default_ajax_action.json symlink
-			symlink = os.path.join(path.dest(path.SRC, path_src), "default_ajax_action.json")
-			symlink_dest = "./index.html.json"
-			if has_defaulthtml:
-				symlink_dest = "./default.html.json"
-			if os.path.exists(symlink):
-				if not os.path.islink(symlink) or (os.readlink(symlink) != symlink_dest):
-					if os.path.isdir(symlink):
-						delete_with_extreme_prejudice(symlink)
-					else:
-						os.remove(symlink)
-					os.symlink(symlink_dest, symlink)
-			else:
+	if redirect_mode == "symlink":
+		# create default_ajax_action.json symlink
+		symlink = os.path.join(path.dest(path.MUTUAL, path_mut), "default_ajax_action.json")
+		symlink_dest = "./index.html.json"
+		if has_defaulthtml:
+			symlink_dest = "./default.html.json"
+		if os.path.exists(symlink):
+			if not os.path.islink(symlink) or (os.readlink(symlink) != symlink_dest):
+				if os.path.isdir(symlink):
+					delete_with_extreme_prejudice(symlink)
+				else:
+					os.remove(symlink)
 				os.symlink(symlink_dest, symlink)
-			if "default_ajax_action.json" in listing: listing.remove("default_ajax_action.json")
-		elif args.redirect == "htaccess" and path.mutual(path.SRC, path_src) == "":
-			with open(path.dest(path.MUTUAL, ".htaccess"), 'w') as fd:
-				fd.write("""RewriteEngine On
+		else:
+			os.symlink(symlink_dest, symlink)
+	elif redirect_mode == "htaccess" and path.mutual(path.MUTUAL, path_mut) == "":
+		with open(path.dest(path.MUTUAL, ".htaccess"), 'w') as fd:
+			fd.write("""RewriteEngine On
 
 RewriteCond %{{DOCUMENT_ROOT}}{0}/$1default.html.json -f
 RewriteRule ^(.*/)?default_ajax_action.json$ $1default.html.json [L]
@@ -241,10 +257,6 @@ RewriteRule ^(.*/)?default_ajax_action.json$ $1index.html.json [L]
 
 DirectoryIndex default.html index.html
 """.format(template.uri()))
-				if ".htaccess" in listing: listing.remove(".htaccess")
 
-		# remove any unexpected files in the web directory
-		for misc in listing:
-			delete_with_extreme_prejudice(os.path.join(path.dest(path.SRC, path_src), misc))
 
 main()
