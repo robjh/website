@@ -101,7 +101,8 @@ def main():
 
 	template.load(args.url)
 
-	master_index = dict()
+	master_index   = dict()
+	master_anomaly = dict()
 
 	config = load_config(os.path.join(path.dir_src, "config.json"))
 
@@ -109,16 +110,18 @@ def main():
 		if not os.path.exists(path.dest(path.SRC, path_src)):
 			os.mkdir(path.dest(path.SRC, path_src))
 
-		# get a list of files already in the destination, to delete anything unexpected.
-		listing = os.listdir( path.dest(path.SRC, path_src) )
-		if "index.html"               in listing: listing.remove("index.html")
-		if "index.html.json"          in listing: listing.remove("index.html.json")
-		if "default_ajax_action.json" in listing: listing.remove("default_ajax_action.json")
-		if args.redirect == "htaccess" and ".htaccess" in listing: listing.remove(".htaccess")
-
+		# build an index of files to display
 		index = []
-		if path.mutual(path.SRC, path_src) in master_index:
-			index = master_index[path.mutual(path.SRC, path_src)]
+		path_mutual = path.mutual(path.SRC, path_src)
+		if path_mutual in master_index:
+			index = master_index[path_mutual]
+
+		# get a list of files already in the destination, to delete anything unexpected.
+		listing = None
+		if path_mutual in master_anomaly:
+			listing = master_anomaly[path_mutual]
+		else:
+			listing = os.listdir( path.dest(path.MUTUAL, path_mutual) )
 
 		has_defaulthtml = False
 
@@ -206,22 +209,28 @@ def main():
 			else:
 				print("Found unknown file {}, type: {}".format(mutualpath, mimetypes.guess_type(mutualpath)))
 
-		# remove any unexpected files in the web directory
-		for misc in listing:
-			delete_with_extreme_prejudice(os.path.join(path.dest(path.SRC, path_src), misc))
-
-		master_index[path.mutual(path.SRC, path_src)] = index
+		master_index[path_mutual] = index
+		master_anomaly[path_mutual] = listing
 
 	# generate index pages
 	pathobj = Path_Reformatter(src="", dest=args.webdir)
 	for key in master_index:
-		create_index_page(pathobj, key, master_index[key], args.redirect)
+		added_files = create_index_page(pathobj, key, master_index[key], args.redirect)
+		for file in added_files:
+			if file in master_anomaly[key]: master_anomaly[key].remove(file)
+
+	# delete anomilies
+	for dir in master_anomaly:
+		for anomaly in master_anomaly[dir]:
+			delete_with_extreme_prejudice(os.path.join(path.dest(path.MUTUAL, dir), anomaly))
 
 def create_index_page(path, path_mut, index, redirect_mode):
 	# create index pages
+	added_files = []
 	index = sorted(index, key=lambda row: (row["type"] != "dir", row["name"]))
 	with open(os.path.join(path.dest(path.MUTUAL, path_mut), "index.html"), 'w') as fd:
 		fd.write( template.Html_Index(path.absolute(path.MUTUAL, path_mut), index).render(minify=False) )
+		added_files.append("index.html")
 	with open(os.path.join(path.dest(path.MUTUAL, path_mut), "index.html.json"), 'w') as fd:
 		json_index = {}
 		for item in index:
@@ -231,6 +240,7 @@ def create_index_page(path, path_mut, index, redirect_mode):
 			"complete":True,
 			"children":json_index
 		}))
+		added_files.append("index.html.json")
 
 	if redirect_mode == "symlink":
 		# create default_ajax_action.json symlink
@@ -247,6 +257,7 @@ def create_index_page(path, path_mut, index, redirect_mode):
 				os.symlink(symlink_dest, symlink)
 		else:
 			os.symlink(symlink_dest, symlink)
+		added_files.append("default_ajex_action.json")
 	elif redirect_mode == "htaccess" and path.mutual(path.MUTUAL, path_mut) == "":
 		with open(path.dest(path.MUTUAL, ".htaccess"), 'w') as fd:
 			fd.write("""RewriteEngine On
@@ -257,6 +268,8 @@ RewriteRule ^(.*/)?default_ajax_action.json$ $1index.html.json [L]
 
 DirectoryIndex default.html index.html
 """.format(template.uri()))
+			added_files.append(".htaccess")
 
+	return added_files
 
 main()
